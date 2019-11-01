@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: com.elpassion.android.commons:recycler:0.0.21@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8c09c0c58f67d05b112a05d4b726e998/jetified-recycler-0.0.21/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8c09c0c58f67d05b112a05d4b726e998/jetified-recycler-0.0.21/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.elpassion.android.commons/recycler/0.0.21/5f1fa8f7cc95abe902ad87d7332e05077a8c9b4/recycler-0.0.21-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.elpassion.android.commons/recycler/0.0.21/79a71318c4d7a203cbd0d3a5eb8f521abadff692/recycler-0.0.21-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

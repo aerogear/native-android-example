@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: com.apollographql.apollo:apollo-api:1.2.0@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.apollographql.apollo/apollo-api/1.2.0/35b686cad981d3b63503c21399815fe24d56bd8e/apollo-api-1.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.apollographql.apollo/apollo-api/1.2.0/2840c29d589d5a932373efba3f66c2d648f9f878/apollo-api-1.2.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.apollographql.apollo/apollo-api/1.2.0/fe830fe3407ddd0d40d63573bc296bc71ae09d8/apollo-api-1.2.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

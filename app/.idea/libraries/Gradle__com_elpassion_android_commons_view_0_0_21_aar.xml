@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: com.elpassion.android.commons:view:0.0.21@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/286f899cdff65c1ab5973944bb411163/jetified-view-0.0.21/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/286f899cdff65c1ab5973944bb411163/jetified-view-0.0.21/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.elpassion.android.commons/view/0.0.21/4073f0ffca91fde4bdc16ad801283b0b1101830d/view-0.0.21-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.elpassion.android.commons/view/0.0.21/53e9eff6f4e5056a063c073d19b0e982901ac0e8/view-0.0.21-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
