@@ -1,0 +1,8 @@
+
+
+
+mutation createTask ($taskTitle: String!, $taskDescription: String!) {
+  createTask(title: $taskTitle, description: $taskDescription, status: OPEN) {
+     ...TaskFields
+  }
+}

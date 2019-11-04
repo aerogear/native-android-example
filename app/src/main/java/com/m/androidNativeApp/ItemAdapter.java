@@ -57,8 +57,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         // filling in each field for inflation
         holder.title.setText(item.getTitle());
         holder.description.setText(item.getDescription());
-        holder.deleteButton.setTag(item.getId());
-        //holder.deleteButton.callOnClick();
+       holder.deleteButton.setTag(item.getId());
 
     }
 
@@ -72,7 +71,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     class ItemViewHolder extends RecyclerView.ViewHolder {
 
         TextView title, description;
-        Button deleteButton;
+       Button deleteButton;
 
         public ItemViewHolder(@NonNull View itemView) {
             super(itemView);
