@@ -3,12 +3,14 @@ package com.m.androidNativeApp;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
 
 import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import android.os.Bundle;
+
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.api.Response;
@@ -20,12 +22,13 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-   // private static final ApolloClient client = new Client().setupApollo();
+    // private static final ApolloClient client = new Client().setupApollo();
     //creating instance of Item Adapter Class with recycler view
     private String taskTitle, taskDescription, taskId;
     RecyclerView recyclerView;
     ItemAdapter itemAdapter;
     List<Item> itemList;
+    Item itemToRemove;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                 .builder()
                 .build();
 
-        Client.client.query(tasksQuery).enqueue(new ApolloCall.Callback<AllTasksQuery.Data>() {
+        Client.setupApollo().query(tasksQuery).enqueue(new ApolloCall.Callback<AllTasksQuery.Data>() {
             @Override
             public void onResponse(@NotNull Response<AllTasksQuery.Data> response) {
 
@@ -52,17 +55,18 @@ public class MainActivity extends AppCompatActivity {
 
                 final int dataLength = mResponse.allTasks().size();
 
+                for (int i = 0; i < dataLength; i++) {
+                    taskTitle = mResponse.allTasks().get(i).fragments().taskFields().title();
+                    taskDescription = mResponse.allTasks().get(i).fragments().taskFields().description();
+                    taskId = mResponse.allTasks().get(i).fragments().taskFields().id();
+                    itemList.add(new Item(taskTitle, taskDescription, taskId));
+                }
+
+                itemAdapter = new ItemAdapter(MainActivity.this, itemList);
+
                 MainActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        for (int i = 0; i < dataLength; i++) {
-                            taskTitle = mResponse.allTasks().get(i).fragments().taskFields().title();
-                            taskDescription = mResponse.allTasks().get(i).fragments().taskFields().description();
-                            taskId = mResponse.allTasks().get(i).fragments().taskFields().id();
-                            itemList.add(new Item(taskTitle, taskDescription, taskId));
-                        }
-
-                        itemAdapter = new ItemAdapter(MainActivity.this, itemList);
                         recyclerView.setAdapter(itemAdapter);
                     }
                 });
@@ -77,20 +81,33 @@ public class MainActivity extends AppCompatActivity {
 
     public void deleteTask(View view) {
 
-        Button button = view.findViewById(R.id.deleteButton);
+        final Button button = view.findViewById(R.id.deleteButton);
 
-        System.out.println(button.getTag());
-
-        String buttonId = button.getTag().toString();
+        final String buttonId = button.getTag().toString();
 
         DeleteTaskMutation deleteTask = DeleteTaskMutation
                 .builder()
                 .id(buttonId)
                 .build();
 
-        Client.client.mutate(deleteTask).enqueue(new ApolloCall.Callback<DeleteTaskMutation.Data>() {
+        Client.setupApollo().mutate(deleteTask).enqueue(new ApolloCall.Callback<DeleteTaskMutation.Data>() {
             @Override
-            public void onResponse(@NotNull Response<DeleteTaskMutation.Data> response) {
+            public void onResponse(@NotNull final Response<DeleteTaskMutation.Data> response) {
+
+                for (Item item : itemList) {
+                    if (item.id.equals(response.data().deleteTask())) {
+                        itemToRemove = item;
+                    }
+                }
+
+                itemList.remove(itemToRemove);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        itemAdapter.notifyDataSetChanged();
+                    }
+                });
 
             }
 
@@ -101,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void addTask(View view){
+    public void addTask(View view) {
         Intent launchActivity1 = new Intent(this, CreateTask.class);
         startActivity(launchActivity1);
     }

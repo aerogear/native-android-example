@@ -14,13 +14,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class CreateTask extends Activity {
 
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.add_task);
     }
 
-    public void backToMain(View view){
+    public void createTask(View view) {
         EditText taskTitle = (EditText) findViewById(R.id.title_input);
         EditText taskDescription = (EditText) findViewById(R.id.description_input);
 
@@ -30,7 +30,7 @@ public class CreateTask extends Activity {
                 .taskDescription(taskDescription.getText().toString())
                 .build();
 
-        Client.client.mutate(createTask).enqueue(new ApolloCall.Callback<CreateTaskMutation.Data>() {
+        Client.setupApollo().mutate(createTask).enqueue(new ApolloCall.Callback<CreateTaskMutation.Data>() {
             @Override
             public void onResponse(@NotNull Response<CreateTaskMutation.Data> response) {
                 System.out.println("Success");
