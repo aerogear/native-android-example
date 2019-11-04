@@ -31,7 +31,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
         android:background="@drawable/button_border"
-        android:onClick="backToMain"
+        android:onClick="createTask"
         android:text="Create Task"
         android:textSize="18sp"
         android:textStyle="bold"
