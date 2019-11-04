@@ -6,7 +6,7 @@ import okhttp3.OkHttpClient;
 
 public class Client {
 
-    private static final String SERVER_URL = "http://10.0.2.2:4000/graphql";
+    private static final String SERVER_URL = "https://ionic-showcase-server-customer-a-shar-b4c5.apps.ire-85ac.open.redhat.com/graphql";
 
     public static ApolloClient setupApollo() {
 
@@ -19,4 +19,6 @@ public class Client {
                 .okHttpClient(okHttpClient)
                 .build();
     }
+
+    public static ApolloClient client = new Client().setupApollo();
 }

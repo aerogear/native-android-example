@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+
+import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import android.os.Bundle;
@@ -18,7 +20,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final ApolloClient client = new Client().setupApollo();
+   // private static final ApolloClient client = new Client().setupApollo();
     //creating instance of Item Adapter Class with recycler view
     private String taskTitle, taskDescription, taskId;
     RecyclerView recyclerView;
@@ -42,19 +44,28 @@ public class MainActivity extends AppCompatActivity {
                 .builder()
                 .build();
 
-        client.query(tasksQuery).enqueue(new ApolloCall.Callback<AllTasksQuery.Data>() {
+        Client.client.query(tasksQuery).enqueue(new ApolloCall.Callback<AllTasksQuery.Data>() {
             @Override
             public void onResponse(@NotNull Response<AllTasksQuery.Data> response) {
+
                 final AllTasksQuery.Data mResponse = response.data();
 
                 final int dataLength = mResponse.allTasks().size();
 
-                for (int i = 0; i < dataLength; i++) {
-                    taskTitle = mResponse.allTasks().get(i).fragments().taskFields().title();
-                    taskDescription = mResponse.allTasks().get(i).fragments().taskFields().description();
-                    taskId = mResponse.allTasks().get(i).fragments().taskFields().id();
-                    itemList.add(new Item(taskTitle, taskDescription, taskId));
-                }
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < dataLength; i++) {
+                            taskTitle = mResponse.allTasks().get(i).fragments().taskFields().title();
+                            taskDescription = mResponse.allTasks().get(i).fragments().taskFields().description();
+                            taskId = mResponse.allTasks().get(i).fragments().taskFields().id();
+                            itemList.add(new Item(taskTitle, taskDescription, taskId));
+                        }
+
+                        itemAdapter = new ItemAdapter(MainActivity.this, itemList);
+                        recyclerView.setAdapter(itemAdapter);
+                    }
+                });
             }
 
             @Override
@@ -62,9 +73,6 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(e);
             }
         });
-
-        itemAdapter = new ItemAdapter(this, itemList);
-        recyclerView.setAdapter(itemAdapter);
     }
 
     public void deleteTask(View view) {
@@ -80,17 +88,22 @@ public class MainActivity extends AppCompatActivity {
                 .id(buttonId)
                 .build();
 
-        client.mutate(deleteTask).enqueue(new ApolloCall.Callback<DeleteTaskMutation.Data>() {
+        Client.client.mutate(deleteTask).enqueue(new ApolloCall.Callback<DeleteTaskMutation.Data>() {
             @Override
             public void onResponse(@NotNull Response<DeleteTaskMutation.Data> response) {
-                System.out.println("Success");
+
             }
 
             @Override
             public void onFailure(@NotNull ApolloException e) {
-                System.out.println("Error");
+                System.out.println(e);
             }
         });
+    }
+
+    public void addTask(View view){
+        Intent launchActivity1 = new Intent(this, CreateTask.class);
+        startActivity(launchActivity1);
     }
 
 }
