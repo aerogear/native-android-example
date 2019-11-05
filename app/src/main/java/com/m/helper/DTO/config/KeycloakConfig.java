@@ -1,4 +1,4 @@
-package com.m.helpper.DTO.config;
+package com.m.helper.DTO.config;
 
 import com.google.gson.annotations.SerializedName;
 

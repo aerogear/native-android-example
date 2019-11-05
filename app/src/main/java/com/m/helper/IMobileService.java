@@ -1,6 +1,6 @@
-package com.m.helpper;
+package com.m.helper;
 
-public interface MobileServices {
+public interface IMobileService {
     String getGraphqlServer();
     String getKIssuer();
     String getKClientId();

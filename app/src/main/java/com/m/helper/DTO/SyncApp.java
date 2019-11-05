@@ -1,6 +1,6 @@
-package com.m.helpper.DTO;
+package com.m.helper.DTO;
 
-import com.m.helpper.DTO.config.SyncConfig;
+import com.m.helper.DTO.config.SyncConfig;
 
 public class SyncApp extends Service {
     private String url;

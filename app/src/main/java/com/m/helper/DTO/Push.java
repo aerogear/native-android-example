@@ -1,7 +1,7 @@
-package com.m.helpper.DTO;
+package com.m.helper.DTO;
 
-import com.m.helpper.DTO.config.AndroidConfig;
-import com.m.helpper.DTO.config.PushConfig;
+import com.m.helper.DTO.config.AndroidConfig;
+import com.m.helper.DTO.config.PushConfig;
 
 public class Push extends Service {
 

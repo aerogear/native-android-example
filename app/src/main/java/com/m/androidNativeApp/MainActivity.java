@@ -1,6 +1,5 @@
 package com.m.androidNativeApp;
 
-import androidx.annotation.MainThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,7 +13,7 @@ import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
-import com.m.helpper.MobileService;
+import com.m.helper.MobileService;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,9 +36,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        context = getApplicationContext();
 
+        context = getApplicationContext();
         mobileService = MobileService.getInstance(context.getApplicationContext());
+
+        // mobileServices needs to be created before the Apollo client can be created.
         client = new Client().setupApollo();
 
         // initialize item list
