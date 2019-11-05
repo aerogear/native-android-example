@@ -1,14 +1,29 @@
 {
   "clientId": "myapp",
   "namespace": "mobile-console",
-  "services": [{
+  "services": [
+    {
     "config": {
       "websocketUrl": "ws://example.com/graphql"
-    },
+      },
     "id": "cc82a0c8-e68c-11e9-af1c-0800270766f9",
     "name": "sync-app",
     "type": "sync-app",
     "url": "http://10.0.2.2:4000/graphql"
-  }
+    },
+    {
+    "config": {
+      "auth-server-url": "https://sso-user-sso.apps.ire-586a.open.redhat.com/auth",
+      "confidential-port": 0,
+      "public-client": true,
+      "realm": "frontpage-app-realm",
+      "resource": "frontpage-app-client",
+      "ssl-required": "external"
+      },
+    "id": "1fafffec-f001-11e9-9081-0a07b338f92c",
+    "name": "keycloak",
+    "type": "keycloak",
+    "url": "https://sso-user-sso.apps.ire-586a.open.redhat.com/auth"
+    }
   ]
 }

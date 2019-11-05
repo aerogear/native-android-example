@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.m.helpper.DTO.Keycloak;
 import com.m.helpper.DTO.MobileServiceJSON;
 import com.m.helpper.DTO.Service;
 import com.m.helpper.DTO.SyncApp;
@@ -55,6 +56,21 @@ public class MobileService implements MobileServices {
         return service.getUrl();
     }
 
+    @Override
+    public String getKIssuer() {
+        Keycloak service = (Keycloak) config.getServiceByType("keycloak");
+        String server = service.getConfig().getAuth_server_url();
+        String realm = service.getConfig().getRealm();
+        String kIssuer = server + "/realms/" + realm + "/";
+        return kIssuer;
+    }
+
+    @Override
+    public String getKClientId() {
+        Keycloak service = (Keycloak) config.getServiceByType("keycloak");
+        return service.getConfig().getResource();
+    }
+
     private void readMobileServiceJSON(){
         try {
             InputStream IS = assetManager.open("config/mobile-services.json");
@@ -78,8 +94,6 @@ public class MobileService implements MobileServices {
                 }
             }
 
-            System.out.println("APP: Service Type: " + config.getService(0).getType());
-
         } catch (FileNotFoundException e) {
             System.out.println("APP: FileNotFoundException " + e.toString());
         } catch (IOException e) {
@@ -91,10 +105,13 @@ public class MobileService implements MobileServices {
 
     private Service buildService(JsonObject service){
         Service result = null;
-
+//        TODO add enums for all string lookup values
         switch (service.get("type").getAsString()) {
             case "sync-app":
                 result = gson.fromJson(service, SyncApp.class);
+                break;
+            case "keycloak":
+                result = gson.fromJson(service, Keycloak.class);
                 break;
             default:
                 System.out.println("APP: No type found");
