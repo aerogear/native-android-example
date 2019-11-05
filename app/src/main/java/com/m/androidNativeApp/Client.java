@@ -10,7 +10,6 @@ import okhttp3.OkHttpClient;
 
 public class Client {
 
-
     public ApolloClient setupApollo(String serverUrl) {
         OkHttpClient okHttpClient = new OkHttpClient
                 .Builder()
