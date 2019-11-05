@@ -24,6 +24,18 @@
     "name": "keycloak",
     "type": "keycloak",
     "url": "https://sso-user-sso.apps.ire-586a.open.redhat.com/auth"
+    },
+    {
+      "config": {
+        "android": {
+          "variantId": "9e505d21-3179-4aea-a0de-66edb0a494d5",
+          "variantSecret": "ceae64c6-cee4-4677-b6b0-29b9c82d3ae1"
+        }
+      },
+      "id": "48725258-ffb8-11e9-95d0-022694327861",
+      "name": "push",
+      "type": "push",
+      "url": "https://unifiedpush-unifiedpush-proxy-mobile-unifiedpush.apps.ire-85ac.open.redhat.com"
     }
   ]
 }

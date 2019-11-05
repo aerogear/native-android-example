@@ -5,12 +5,16 @@ import android.content.res.AssetManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.m.helpper.DTO.Keycloak;
 import com.m.helpper.DTO.MobileServiceJSON;
+import com.m.helpper.DTO.Push;
 import com.m.helpper.DTO.Service;
 import com.m.helpper.DTO.SyncApp;
+import com.m.helpper.DTO.config.AndroidConfig;
+
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -71,6 +75,24 @@ public class MobileService implements MobileServices {
         return service.getConfig().getResource();
     }
 
+    @Override
+    public String getPushUrl() {
+        Push service = (Push) config.getServiceByType("push");
+        return service.getUrl();
+    }
+
+    @Override
+    public String getPushVariantId() {
+        Push service = (Push) config.getServiceByType("push");
+        return service.getConfig().getVariantId();
+    }
+
+    @Override
+    public String getPushVariantSecret() {
+        Push service = (Push) config.getServiceByType("push");
+        return service.getConfig().getVariantSecret();
+    }
+
     private void readMobileServiceJSON(){
         try {
             InputStream IS = assetManager.open("config/mobile-services.json");
@@ -113,10 +135,19 @@ public class MobileService implements MobileServices {
             case "keycloak":
                 result = gson.fromJson(service, Keycloak.class);
                 break;
+            case "push":
+                Push r = gson.fromJson(service, Push.class);
+                JsonElement jsonConfig = service.get("config");
+                JsonElement jsonAndroidConfig = jsonConfig.getAsJsonObject().get("android");
+                AndroidConfig androidConfig = gson.fromJson(jsonAndroidConfig, AndroidConfig.class);
+                r.setConfig(androidConfig);
+                result = r;
+                break;
             default:
                 System.out.println("APP: No type found");
 
         }
+
 
         return result;
     }

@@ -42,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
         mobileService = MobileService.getInstance(context.getApplicationContext());
         client = new Client().setupApollo();
 
-        System.out.println("APP: KClientId: " + mobileService.getKClientId());
-
         // initialize item list
         itemList = new ArrayList<>();
 
