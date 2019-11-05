@@ -2,7 +2,7 @@ package com.m.androidNativeApp;
 
 public class Item {
 
-    String title, description, id;
+    private String title, description, id;
 
 
     public Item(String title, String description, String id) {

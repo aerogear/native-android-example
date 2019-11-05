@@ -16,13 +16,12 @@
         android:id="@+id/addTaskButton"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="500dp"
         android:layout_marginLeft="280dp"
-        android:onClick="addTask"
+        android:layout_marginTop="500dp"
         android:background="@drawable/button_border"
+        android:onClick="addTaskActivity"
         android:text="Add Task"
         android:textSize="18sp"
-        android:textStyle="bold"
-        />
+        android:textStyle="bold" />
 
 </RelativeLayout>

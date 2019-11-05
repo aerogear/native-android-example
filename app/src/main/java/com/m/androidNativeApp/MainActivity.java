@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import android.os.Bundle;
-import android.widget.EditText;
 
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
@@ -33,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String taskTitle, taskDescription, taskId;
     RecyclerView recyclerView;
-    ItemAdapter itemAdapter;
+    public ItemAdapter itemAdapter;
     List<Item> itemList;
     Item itemToRemove;
 
@@ -72,18 +71,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void subscribeToDeleteTask() {
-
         DeleteTaskSubscription deleteTaskSubscription = DeleteTaskSubscription
                 .builder()
                 .build();
 
-        client.subscribe(deleteTaskSubscription).execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
 
+        client.subscribe(deleteTaskSubscription).execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
             @Override
             public void onResponse(@NotNull Response<DeleteTaskSubscription.Data> response) {
 
                 for (Item item : itemList) {
-                    if (item.id.equals(response.data().taskDeleted.fragments().taskFields.id())) {
+                    if (item.getId().equals(response.data().taskDeleted.fragments().taskFields.id())) {
                         itemToRemove = item;
                     }
                 }
@@ -125,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
         AddTaskSubscription addTaskSubscription = AddTaskSubscription
                 .builder()
                 .build();
+
         client.subscribe(addTaskSubscription).execute(new ApolloSubscriptionCall.Callback<AddTaskSubscription.Data>() {
             @Override
             public void onResponse(@NotNull Response<AddTaskSubscription.Data> response) {
@@ -178,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(@NotNull final Response<DeleteTaskMutation.Data> response) {
 
                 for (Item item : itemList) {
-                    if (response.data() != null && item.id.equals(response.data().deleteTask())) {
+                    if (response.data() != null && item.getId().equals(response.data().deleteTask())) {
                         itemToRemove = item;
                     }
                 }
@@ -201,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void addTask(View view) {
+    public void addTaskActivity(View view) {
         Intent launchActivity1 = new Intent(this, CreateTask.class);
         startActivity(launchActivity1);
     }
