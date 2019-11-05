@@ -1,0 +1,14 @@
+{
+  "clientId": "myapp",
+  "namespace": "mobile-console",
+  "services": [{
+    "config": {
+      "websocketUrl": "ws://example.com/graphql"
+    },
+    "id": "cc82a0c8-e68c-11e9-af1c-0800270766f9",
+    "name": "sync-app",
+    "type": "sync-app",
+    "url": "http://10.0.2.2:4000/graphql"
+  }
+  ]
+}

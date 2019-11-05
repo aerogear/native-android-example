@@ -1,21 +1,25 @@
 package com.m.androidNativeApp;
 
+import android.content.Context;
+
 import com.apollographql.apollo.ApolloClient;
+import com.m.helpper.MobileService;
 
 import okhttp3.OkHttpClient;
 
 public class Client {
+    private static String SERVER_URL;
+    private MobileService mobileService = MobileService.getInstance();
 
-    private static final String SERVER_URL = "http://10.0.2.2:4000/graphql";
-
-    public static ApolloClient setupApollo() {
+    public ApolloClient setupApollo() {
 
         OkHttpClient okHttpClient = new OkHttpClient
                 .Builder()
                 .build();
 
+        System.out.println("APP: In Client: url: " + mobileService.getGraphqlServer());
         return ApolloClient.builder()
-                .serverUrl(SERVER_URL)
+                .serverUrl(mobileService.getGraphqlServer())
                 .okHttpClient(okHttpClient)
                 .build();
     }
