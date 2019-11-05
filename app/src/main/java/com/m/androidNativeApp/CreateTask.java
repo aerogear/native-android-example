@@ -12,6 +12,8 @@ import com.apollographql.apollo.exception.ApolloException;
 
 import org.jetbrains.annotations.NotNull;
 
+import static com.m.androidNativeApp.Client.apolloClient;
+
 public class CreateTask extends Activity {
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +32,7 @@ public class CreateTask extends Activity {
                 .taskDescription(taskDescription.getText().toString())
                 .build();
 
-        Client.setupApollo().mutate(createTask).enqueue(new ApolloCall.Callback<CreateTaskMutation.Data>() {
+        apolloClient.mutate(createTask).enqueue(new ApolloCall.Callback<CreateTaskMutation.Data>() {
             @Override
             public void onResponse(@NotNull Response<CreateTaskMutation.Data> response) {
                 System.out.println("Success");
@@ -42,7 +44,6 @@ public class CreateTask extends Activity {
             }
         });
 
-        Intent launchActivity2 = new Intent(this, MainActivity.class);
-        startActivity(launchActivity2);
+        finish();
     }
 }
