@@ -1,4 +1,4 @@
-package com.m.helper.DTO.config;
+package com.m.helper.configModel.config;
 
 public class AndroidConfig {
     private String variantId;

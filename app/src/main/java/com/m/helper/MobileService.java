@@ -8,12 +8,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.m.helper.DTO.Keycloak;
-import com.m.helper.DTO.MobileServiceJSON;
-import com.m.helper.DTO.Push;
-import com.m.helper.DTO.Service;
-import com.m.helper.DTO.SyncApp;
-import com.m.helper.DTO.config.AndroidConfig;
+import com.m.helper.configModel.Keycloak;
+import com.m.helper.configModel.MobileServiceJSON;
+import com.m.helper.configModel.Push;
+import com.m.helper.configModel.Service;
+import com.m.helper.configModel.SyncApp;
+import com.m.helper.configModel.config.AndroidConfig;
 
 
 import java.io.BufferedReader;
@@ -33,13 +33,13 @@ public class MobileService implements IMobileService {
     private final String KEYCLOAK = "keycloak";
     private final String PUSH = "push";
 
+    private final String FILE_LOCATION = "config/mobile-services.json";
+
     private MobileService(Context context){
         System.out.println("APP : Setting up Mobile Services");
         assetManager = context.getAssets();
         readMobileServiceJSON();
     }
-
-    private MobileService(){}
 
     public static MobileService getInstance(Context context) {
         if (INSTANCE == null) {
@@ -49,9 +49,6 @@ public class MobileService implements IMobileService {
     }
 
     public static MobileService getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new MobileService();
-        }
         return INSTANCE;
     }
 
@@ -138,9 +135,9 @@ public class MobileService implements IMobileService {
     }
 
     private BufferedReader getBufferReader() throws IOException {
-        InputStream IS = assetManager.open("config/mobile-services.json");
-        InputStreamReader ISR = new InputStreamReader(IS);
-        return new BufferedReader(ISR);
+        InputStream inputStream = assetManager.open(FILE_LOCATION);
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        return new BufferedReader(inputStreamReader);
     }
 
     private JsonObject getJsonObject(BufferedReader bufferedReader){

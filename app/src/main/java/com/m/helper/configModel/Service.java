@@ -1,4 +1,4 @@
-package com.m.helper.DTO;
+package com.m.helper.configModel;
 
 public class Service {
     private String id;

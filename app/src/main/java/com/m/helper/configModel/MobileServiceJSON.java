@@ -1,4 +1,4 @@
-package com.m.helper.DTO;
+package com.m.helper.configModel;
 
 import java.util.ArrayList;
 

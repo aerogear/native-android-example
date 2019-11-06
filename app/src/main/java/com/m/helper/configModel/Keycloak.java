@@ -1,6 +1,6 @@
-package com.m.helper.DTO;
+package com.m.helper.configModel;
 
-import com.m.helper.DTO.config.KeycloakConfig;
+import com.m.helper.configModel.config.KeycloakConfig;
 
 public class Keycloak extends Service {
 
