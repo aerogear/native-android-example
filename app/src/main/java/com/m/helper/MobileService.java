@@ -48,10 +48,6 @@ public class MobileService implements IMobileService {
         return INSTANCE;
     }
 
-    public static MobileService getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public String getGraphqlServer() {
         SyncApp service = (SyncApp) config.getServiceByType(SYNC_APP);

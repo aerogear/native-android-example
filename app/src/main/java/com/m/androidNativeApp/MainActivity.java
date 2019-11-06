@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         mobileService = MobileService.getInstance(context.getApplicationContext());
 
         // mobileServices needs to be created before the Apollo client can be created.
-        client = new Client().setupApollo();
+        client = new Client().setupApollo(mobileService.getGraphqlServer());
 
         // initialize item list
         itemList = new ArrayList<>();
