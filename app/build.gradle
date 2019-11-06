@@ -33,5 +33,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.elpassion.android.commons:recycler:0.0.21'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.code.gson:gson:2.8.6'
 }

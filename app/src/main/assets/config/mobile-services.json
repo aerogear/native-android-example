@@ -9,7 +9,7 @@
     "id": "cc82a0c8-e68c-11e9-af1c-0800270766f9",
     "name": "sync-app",
     "type": "sync-app",
-    "url": "http://10.0.2.2:4000/graphql"
+    "url": "https://ionic-showcase-server-customer-a-shar-b4c5.apps.ire-85ac.open.redhat.com/graphql"
     },
     {
     "config": {

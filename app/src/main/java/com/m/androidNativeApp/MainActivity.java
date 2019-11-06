@@ -35,15 +35,13 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     public MobileService mobileService;
-    private ApolloClient client;
+    public static ApolloClient client;
     //creating instance of Item Adapter Class with recycler view
 
     private String taskTitle, taskDescription, taskId;
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
     private List<Item> itemList;
-
-
     public Context context;
 
     @Override
@@ -55,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
         mobileService = MobileService.getInstance(context.getApplicationContext());
 
         // mobileServices needs to be created before the Apollo client can be created.
-        client = new Client().setupApollo(mobileService.getGraphqlServer());
+        client = Client.setupApollo(mobileService.getGraphqlServer());
+        //client = new Client().setupApollo(mobileService.getGraphqlServer());
 
         // initialize item list
         itemList = new ArrayList<>();
