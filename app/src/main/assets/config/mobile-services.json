@@ -1,0 +1,41 @@
+{
+  "clientId": "myapp",
+  "namespace": "mobile-console",
+  "services": [
+    {
+    "config": {
+      "websocketUrl": "ws://example.com/graphql"
+      },
+    "id": "cc82a0c8-e68c-11e9-af1c-0800270766f9",
+    "name": "sync-app",
+    "type": "sync-app",
+    "url": "http://10.0.2.2:4000/graphql"
+    },
+    {
+    "config": {
+      "auth-server-url": "https://sso-user-sso.apps.ire-586a.open.redhat.com/auth",
+      "confidential-port": 0,
+      "public-client": true,
+      "realm": "frontpage-app-realm",
+      "resource": "frontpage-app-client",
+      "ssl-required": "external"
+      },
+    "id": "1fafffec-f001-11e9-9081-0a07b338f92c",
+    "name": "keycloak",
+    "type": "keycloak",
+    "url": "https://sso-user-sso.apps.ire-586a.open.redhat.com/auth"
+    },
+    {
+      "config": {
+        "android": {
+          "variantId": "9e505d21-3179-4aea-a0de-66edb0a494d5",
+          "variantSecret": "ceae64c6-cee4-4677-b6b0-29b9c82d3ae1"
+        }
+      },
+      "id": "48725258-ffb8-11e9-95d0-022694327861",
+      "name": "push",
+      "type": "push",
+      "url": "https://unifiedpush-unifiedpush-proxy-mobile-unifiedpush.apps.ire-85ac.open.redhat.com"
+    }
+  ]
+}

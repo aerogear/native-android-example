@@ -6,16 +6,15 @@ import okhttp3.OkHttpClient;
 
 public class Client {
 
-    private static final String SERVER_URL = "http://10.0.2.2:4000/graphql";
-
-    public static ApolloClient setupApollo() {
+    public ApolloClient setupApollo(String serverUrl) {
 
         OkHttpClient okHttpClient = new OkHttpClient
                 .Builder()
                 .build();
 
+        System.out.println("APP: In Client: url: " + serverUrl);
         return ApolloClient.builder()
-                .serverUrl(SERVER_URL)
+                .serverUrl(serverUrl)
                 .okHttpClient(okHttpClient)
                 .build();
     }

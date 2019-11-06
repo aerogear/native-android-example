@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+
+import android.content.Context;
 import android.view.View;
 import android.widget.Button;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.m.helper.MobileService;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -18,17 +21,27 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final ApolloClient client = new Client().setupApollo();
+    public MobileService mobileService;
+    private ApolloClient client;
     //creating instance of Item Adapter Class with recycler view
     private String taskTitle, taskDescription, taskId;
     RecyclerView recyclerView;
     ItemAdapter itemAdapter;
     List<Item> itemList;
 
+
+    public Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        context = getApplicationContext();
+        mobileService = MobileService.getInstance(context.getApplicationContext());
+
+        // mobileServices needs to be created before the Apollo client can be created.
+        client = new Client().setupApollo(mobileService.getGraphqlServer());
 
         // initialize item list
         itemList = new ArrayList<>();
