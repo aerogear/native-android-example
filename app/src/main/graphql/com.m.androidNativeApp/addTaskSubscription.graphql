@@ -1,0 +1,5 @@
+subscription addTask{
+taskAdded{
+...TaskFields
+}
+}
