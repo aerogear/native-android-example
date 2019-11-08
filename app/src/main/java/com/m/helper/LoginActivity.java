@@ -100,14 +100,9 @@ public class LoginActivity extends AppCompatActivity {
     private void performTokenRequest(TokenRequest request) {
         mAuthService.performTokenRequest(
                 request,
-                new AuthorizationService.TokenResponseCallback() {
-                    @Override
-                    public void onTokenRequestCompleted(
-                            @Nullable TokenResponse tokenResponse,
-                            @Nullable AuthorizationException ex) {
-                        receivedTokenResponse(tokenResponse, ex);
-                        mAuthStateManager.updateAfterTokenResponse(tokenResponse, ex);
-                    }
+                (tokenResponse, ex) -> {
+                    receivedTokenResponse(tokenResponse, ex);
+                    mAuthStateManager.updateAfterTokenResponse(tokenResponse, ex);
                 });
     }
 

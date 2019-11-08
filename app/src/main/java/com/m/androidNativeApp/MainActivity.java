@@ -47,12 +47,7 @@ public class MainActivity extends AppCompatActivity {
         setupClient();
         itemAdapter = getAdapter();
 
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                recyclerView.setAdapter(itemAdapter);
-            }
-        });
+        MainActivity.this.runOnUiThread(() -> recyclerView.setAdapter(itemAdapter));
 
         getTasks();
         subscribeToAddTask();
@@ -74,12 +69,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        itemAdapter.notifyDataSetChanged();
-                    }
-                });
+                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
 
             }
 
@@ -118,12 +108,7 @@ public class MainActivity extends AppCompatActivity {
                 TaskFields dataReceived = response.data().taskAdded().fragments().taskFields;
                 itemList.add(new Item(dataReceived.title(), dataReceived.description(), dataReceived.id()));
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        itemAdapter.notifyDataSetChanged();
-                    }
-                });
+                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
             }
 
             @Override
@@ -173,12 +158,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        itemAdapter.notifyDataSetChanged();
-                    }
-                });
+                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
 
             }
 
@@ -214,12 +194,7 @@ public class MainActivity extends AppCompatActivity {
                     taskId = dataReceived.id();
                     itemList.add(new Item(taskTitle, taskDescription, taskId));
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        itemAdapter.notifyDataSetChanged();
-                    }
-                });
+                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
             }
 
             @Override
@@ -244,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
 
     public ItemAdapter getAdapter(){
         itemList = new ArrayList<>();
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         itemAdapter = new ItemAdapter(this, itemList);
 

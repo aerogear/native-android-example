@@ -26,8 +26,8 @@ public class CreateTask extends Activity {
     }
 
     public void createTask(View view) {
-        EditText taskTitle = (EditText) findViewById(R.id.title_input);
-        EditText taskDescription = (EditText) findViewById(R.id.description_input);
+        EditText taskTitle = findViewById(R.id.title_input);
+        EditText taskDescription = findViewById(R.id.description_input);
 
         CreateTaskMutation createTask = CreateTaskMutation
                 .builder()
