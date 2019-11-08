@@ -35,7 +35,7 @@ public class MobileService implements IMobileService {
 
     private final String FILE_LOCATION = "config/mobile-services.json";
 
-    private MobileService(Context context){
+    private MobileService(Context context) {
         System.out.println("APP : Setting up Mobile Services");
         assetManager = context.getAssets();
         readMobileServiceJSON();
@@ -86,7 +86,7 @@ public class MobileService implements IMobileService {
         return service.getConfig().getVariantSecret();
     }
 
-    private void readMobileServiceJSON(){
+    private void readMobileServiceJSON() {
         try {
             BufferedReader bufferedReader = getBufferReader();
             JsonObject array = getJsonObject(bufferedReader);
@@ -106,7 +106,7 @@ public class MobileService implements IMobileService {
         }
     }
 
-    private Service buildService(JsonObject service){
+    private Service buildService(JsonObject service) {
         Service result = null;
         switch (service.get("type").getAsString()) {
             case SYNC_APP:
@@ -136,15 +136,15 @@ public class MobileService implements IMobileService {
         return new BufferedReader(inputStreamReader);
     }
 
-    private JsonObject getJsonObject(BufferedReader bufferedReader){
+    private JsonObject getJsonObject(BufferedReader bufferedReader) {
         JsonParser parser = new JsonParser();
         return parser.parse(bufferedReader).getAsJsonObject();
     }
 
     private void configureServices(JsonArray services) {
-        for (int i = 0; i < services.size(); i++){
+        for (int i = 0; i < services.size(); i++) {
             Service newService = buildService(services.get(i).getAsJsonObject());
-            if (newService != null){
+            if (newService != null) {
                 config.addService(newService);
             } else {
                 System.out.println("APP: Service was null");

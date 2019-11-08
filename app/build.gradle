@@ -11,6 +11,13 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [
+                'appAuthRedirectScheme': 'com.m.androidnativeapp'
+        ]
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildTypes {
         release {
@@ -34,4 +41,5 @@ dependencies {
     implementation 'com.elpassion.android.commons:recycler:0.0.21'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'net.openid:appauth:0.7.1'
 }

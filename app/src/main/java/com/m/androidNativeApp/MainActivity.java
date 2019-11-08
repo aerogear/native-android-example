@@ -18,6 +18,11 @@ import com.apollographql.apollo.ApolloSubscriptionCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 
+import com.m.helper.Auth.AuthStateManager;
+import com.m.helper.Client;
+import com.m.helper.CreateTask;
+import com.m.helper.Item;
+import com.m.helper.ItemAdapter;
 import com.m.helper.MobileService;
 import com.m.androidNativeApp.fragment.TaskFields;
 
@@ -30,37 +35,42 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     public MobileService mobileService;
-    public static ApolloClient client;
+    public static  ApolloClient client;
     private String taskTitle, taskDescription, taskId;
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
     private List<Item> itemList;
     public Context context;
+    public AuthStateManager mAuthStateManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mAuthStateManager = AuthStateManager.getInstance(this);
         context = getApplicationContext();
         mobileService = MobileService.getInstance(context.getApplicationContext());
-        client = Client.setupApollo(mobileService.getGraphqlServer());
+        String token = "Bearer " + mAuthStateManager.getCurrent().getAccessToken();
+        client = Client.setupApollo(mobileService.getGraphqlServer(), token);
         itemList = new ArrayList<>();
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
         itemAdapter = new ItemAdapter(this, itemList);
 
         MainActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 recyclerView.setAdapter(itemAdapter);
+
             }
         });
 
-        getTasks();
         subscribeToAddTask();
         subscribeToDeleteTask();
+        getTasks();
+
+
     }
 
     public void subscribeToDeleteTask() {
@@ -72,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
         client.subscribe(deleteTaskSubscription).execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
             @Override
             public void onResponse(@NotNull Response<DeleteTaskSubscription.Data> response) {
-
                 for (Item item : itemList) {
                     if (item.getId().equals(response.data().taskDeleted.fragments().taskFields.id())) {
                         itemList.remove(item);
@@ -179,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        subscribeToDeleteTask();
                         itemAdapter.notifyDataSetChanged();
                     }
                 });

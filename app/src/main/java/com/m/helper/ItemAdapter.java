@@ -1,4 +1,4 @@
-package com.m.androidNativeApp;
+package com.m.helper;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,8 @@ import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.m.androidNativeApp.R;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.m.androidNativeApp;
+package com.m.helper;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,10 +8,13 @@ import android.widget.EditText;
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.m.androidNativeApp.CreateTaskMutation;
+import com.m.androidNativeApp.R;
 
 import org.jetbrains.annotations.NotNull;
 
 import static com.m.androidNativeApp.MainActivity.client;
+
 
 public class CreateTask extends Activity {
 
@@ -42,7 +45,6 @@ public class CreateTask extends Activity {
 
             }
         });
-
         finish();
     }
 }
