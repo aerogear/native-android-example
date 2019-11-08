@@ -1,6 +1,7 @@
 package com.m.helper;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -12,8 +13,8 @@ import com.m.androidNativeApp.CreateTaskMutation;
 import com.m.androidNativeApp.R;
 
 import org.jetbrains.annotations.NotNull;
-
 import static com.m.androidNativeApp.MainActivity.client;
+import static com.m.helper.LoginActivity.RE_AUTH;
 
 
 public class CreateTask extends Activity {
@@ -42,9 +43,14 @@ public class CreateTask extends Activity {
 
             @Override
             public void onFailure(@NotNull ApolloException e) {
-
+                if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                    RE_AUTH = 403;
+                    Intent redirectToRefreshToken = new Intent(CreateTask.this, LoginActivity.class);
+                    startActivity(redirectToRefreshToken);
+                }
             }
         });
+
         finish();
     }
 }

@@ -1,5 +1,6 @@
 package com.m.helper;
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,37 +24,33 @@ import net.openid.appauth.TokenResponse;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private String K_REDIRECT_URI = "com.m.androidnativeapp:/oauth2redirect";
-    private int RC_AUTH = 100;
-    private static AuthState mAuthState;
+    public static AuthState mAuthState;
+    public static AuthStateManager mAuthStateManager;
+    public static MobileService mobileService;
     private AuthorizationService mAuthService;
-    private AuthStateManager mAuthStateManager;
-    private MobileService mobileService;
-    private Context context;
+    private int RC_AUTH = 100;
+    public static int RE_AUTH = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuthStateManager = AuthStateManager.getInstance(this);
-        context = getApplicationContext();
+        Context context = getApplicationContext();
         mobileService = MobileService.getInstance(context.getApplicationContext());
 
-        if (mAuthStateManager.getCurrent().isAuthorized()) {
-            mAuthStateManager.getCurrent().createTokenRefreshRequest();
+        if (mAuthStateManager.getCurrent().isAuthorized() && RE_AUTH == 0) {
             System.out.println("User is authorized already");
-
             startActivity(new Intent(this, MainActivity.class));
+
             finish();
 
-
         } else {
-            mAuthService = new AuthorizationService(this);
             doAuth();
         }
     }
 
     public void doAuth() {
-
+        mAuthService = new AuthorizationService(this);
         final AuthorizationServiceConfiguration.RetrieveConfigurationCallback retrieveCallback =
                 (authorizationServiceConfiguration, e) -> {
                     if (e != null) {
@@ -68,17 +65,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void makeAuthRequest(AuthorizationServiceConfiguration serviceConfiguration) {
+        String k_REDIRECT_URI = "com.m.androidnativeapp:/oauth2redirect";
         AuthorizationRequest.Builder authorizationRequest = new AuthorizationRequest.Builder(
                 serviceConfiguration,
                 mobileService.getKClientId(),
                 ResponseTypeValues.CODE,
-                Uri.parse(K_REDIRECT_URI));
+                Uri.parse(k_REDIRECT_URI));
         AuthorizationRequest authRequest = authorizationRequest.build();
         Intent authIntent = mAuthService.getAuthorizationRequestIntent(authRequest);
         startActivityForResult(authIntent, RC_AUTH);
 
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -86,11 +83,10 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == RC_AUTH) {
             AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
             AuthorizationException ex = AuthorizationException.fromIntent(data);
+
             mAuthStateManager.updateAfterAuthorization(resp, ex);
             mAuthState = new AuthState(resp, ex);
-
             exchangeAuthorizationCode(resp);
-
 
         } else {
             System.out.println("Error, wrong response code");
@@ -119,7 +115,8 @@ public class LoginActivity extends AppCompatActivity {
             @Nullable TokenResponse tokenResponse,
             @Nullable AuthorizationException authException) {
         mAuthState.update(tokenResponse, authException);
+
+        System.out.println("Token expires in : " + mAuthState.getAccessTokenExpirationTime());
         startActivity(new Intent(this, MainActivity.class));
     }
-
 }

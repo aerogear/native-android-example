@@ -13,7 +13,6 @@ public class Client {
 
     public static ApolloClient setupApollo(String serverUrl, String authHeader) {
 
-
         OkHttpClient okHttpClient = new OkHttpClient
                 .Builder()
                 .addInterceptor(chain -> {
