@@ -1,29 +1,29 @@
 {
-  "clientId": "myapp",
-  "namespace": "mobile-console",
+  "clientId": "androidapp",
+  "namespace": "mobile-developer-console",
   "services": [
     {
-    "config": {
-      "websocketUrl": "ws://example.com/graphql"
+      "config": {
+        "auth-server-url": "https://sso-user-sso.apps.ire-85ac.open.redhat.com/auth",
+        "confidential-port": 0,
+        "public-client": true,
+        "realm": "androidapp-realm",
+        "resource": "androidapp-client",
+        "ssl-required": "external"
       },
-    "id": "cc82a0c8-e68c-11e9-af1c-0800270766f9",
-    "name": "sync-app",
-    "type": "sync-app",
-    "url": "https://ionic-showcase-server-customer-a-shar-b4c5.apps.ire-85ac.open.redhat.com/graphql"
+      "id": "4a54df0d-007d-11ea-88e3-022694327861",
+      "name": "keycloak",
+      "type": "keycloak",
+      "url": "https://sso-user-sso.apps.ire-85ac.open.redhat.com/auth"
     },
     {
-    "config": {
-      "auth-server-url": "https://sso-user-sso.apps.ire-586a.open.redhat.com/auth",
-      "confidential-port": 0,
-      "public-client": true,
-      "realm": "frontpage-app-realm",
-      "resource": "frontpage-app-client",
-      "ssl-required": "external"
+      "config": {
+        "websocketUrl": "wss://ionic-showcase-server-customer-a-shar-b4c5.apps.ire-85ac.open.redhat.com/graphql"
       },
-    "id": "1fafffec-f001-11e9-9081-0a07b338f92c",
-    "name": "keycloak",
-    "type": "keycloak",
-    "url": "https://sso-user-sso.apps.ire-586a.open.redhat.com/auth"
+      "id": "94dcaf15-fbd3-11e9-8869-022694327861",
+      "name": "sync-app",
+      "type": "sync-app",
+      "url": "https://ionic-showcase-server-customer-a-shar-b4c5.apps.ire-85ac.open.redhat.com/graphql"
     },
     {
       "config": {

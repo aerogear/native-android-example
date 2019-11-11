@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -17,46 +16,38 @@ import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.ApolloSubscriptionCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
-
-import com.m.helper.MobileService;
+import com.m.helper.Client;
+import com.m.helper.CreateTask;
+import com.m.helper.Item;
+import com.m.helper.ItemAdapter;
 import com.m.androidNativeApp.fragment.TaskFields;
-
+import com.m.helper.LoginActivity;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
+
+import static com.m.helper.LoginActivity.RE_AUTH;
+import static com.m.helper.LoginActivity.mAuthStateManager;
+import static com.m.helper.LoginActivity.mobileService;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    public MobileService mobileService;
     public static ApolloClient client;
     private String taskTitle, taskDescription, taskId;
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
     private List<Item> itemList;
-    public Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        context = getApplicationContext();
-        mobileService = MobileService.getInstance(context.getApplicationContext());
-        client = Client.setupApollo(mobileService.getGraphqlServer());
-        itemList = new ArrayList<>();
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        setupClient();
+        itemAdapter = getAdapter();
 
-        itemAdapter = new ItemAdapter(this, itemList);
-
-        MainActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                recyclerView.setAdapter(itemAdapter);
-            }
-        });
+        MainActivity.this.runOnUiThread(() -> recyclerView.setAdapter(itemAdapter));
 
         getTasks();
         subscribeToAddTask();
@@ -68,11 +59,9 @@ public class MainActivity extends AppCompatActivity {
                 .builder()
                 .build();
 
-
         client.subscribe(deleteTaskSubscription).execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
             @Override
             public void onResponse(@NotNull Response<DeleteTaskSubscription.Data> response) {
-
                 for (Item item : itemList) {
                     if (item.getId().equals(response.data().taskDeleted.fragments().taskFields.id())) {
                         itemList.remove(item);
@@ -80,19 +69,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        itemAdapter.notifyDataSetChanged();
-                    }
-                });
+                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
 
             }
 
             @Override
             public void onFailure(@NotNull ApolloException e) {
-                System.out.println("Failed" + e);
+                if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                    reAuthorise();
+                }
             }
 
             @Override
@@ -123,17 +108,14 @@ public class MainActivity extends AppCompatActivity {
                 TaskFields dataReceived = response.data().taskAdded().fragments().taskFields;
                 itemList.add(new Item(dataReceived.title(), dataReceived.description(), dataReceived.id()));
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        itemAdapter.notifyDataSetChanged();
-                    }
-                });
+                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
             }
 
             @Override
             public void onFailure(@NotNull ApolloException e) {
-                System.out.println("Failed " + e);
+                if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                    reAuthorise();
+                }
             }
 
             @Override
@@ -176,18 +158,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        itemAdapter.notifyDataSetChanged();
-                    }
-                });
+                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
 
             }
 
             @Override
             public void onFailure(@NotNull ApolloException e) {
-                System.out.println(e);
+                if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                    reAuthorise();
+                }
             }
         });
     }
@@ -215,19 +194,35 @@ public class MainActivity extends AppCompatActivity {
                     taskId = dataReceived.id();
                     itemList.add(new Item(taskTitle, taskDescription, taskId));
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        itemAdapter.notifyDataSetChanged();
-                    }
-                });
+                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
             }
 
             @Override
             public void onFailure(@NotNull ApolloException e) {
-                System.out.println(e);
+                if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                    reAuthorise();
+                }
             }
         });
     }
 
+    public void reAuthorise(){
+        RE_AUTH = 403;
+        Intent redirectToRefreshToken = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(redirectToRefreshToken);
+    }
+
+    public void setupClient(){
+        String token = "Bearer " + mAuthStateManager.getCurrent().getAccessToken();
+        client = Client.setupApollo(mobileService.getGraphqlServer(), token);
+    }
+
+    public ItemAdapter getAdapter(){
+        itemList = new ArrayList<>();
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        itemAdapter = new ItemAdapter(this, itemList);
+
+        return itemAdapter;
+    }
 }
