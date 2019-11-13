@@ -223,9 +223,6 @@ public class MainActivity extends AppCompatActivity {
                             itemList.add(new Item(taskTitle, taskDescription, taskId));
                         }
 
-
-                        client.apolloStore().read(tasksQuery);
-
                         runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
                     }
 
