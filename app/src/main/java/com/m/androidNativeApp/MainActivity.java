@@ -6,7 +6,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +19,8 @@ import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.ApolloSubscriptionCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
+import com.apollographql.apollo.fetcher.ResponseFetcher;
 import com.m.helper.Client;
 import com.m.helper.CreateTask;
 import com.m.helper.Item;
@@ -24,6 +29,7 @@ import com.m.androidNativeApp.fragment.TaskFields;
 import com.m.helper.LoginActivity;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
 import static com.m.helper.LoginActivity.RE_AUTH;
@@ -32,7 +38,6 @@ import static com.m.helper.LoginActivity.mobileService;
 
 
 public class MainActivity extends AppCompatActivity {
-
     public static ApolloClient client;
     private String taskTitle, taskDescription, taskId;
     private RecyclerView recyclerView;
@@ -43,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         setupClient();
+
         itemAdapter = getAdapter();
 
         MainActivity.this.runOnUiThread(() -> recyclerView.setAdapter(itemAdapter));
@@ -55,84 +60,93 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void subscribeToDeleteTask() {
+
         DeleteTaskSubscription deleteTaskSubscription = DeleteTaskSubscription
                 .builder()
                 .build();
 
-        client.subscribe(deleteTaskSubscription).execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
-            @Override
-            public void onResponse(@NotNull Response<DeleteTaskSubscription.Data> response) {
-                for (Item item : itemList) {
-                    if (item.getId().equals(response.data().taskDeleted.fragments().taskFields.id())) {
-                        itemList.remove(item);
-                        break;
+        client.subscribe(deleteTaskSubscription)
+                .execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
+                    @Override
+                    public void onResponse(@NotNull Response<DeleteTaskSubscription.Data> response) {
+
+                        for (Item item : itemList) {
+                            if (item.getId().equals(response.data().taskDeleted.fragments().taskFields.id())) {
+                                itemList.remove(item);
+                                break;
+                            }
+                        }
+
+
+                        runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
+
                     }
-                }
 
-                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
+                    @Override
+                    public void onFailure(@NotNull ApolloException e) {
+                        if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                            reAuthorise();
+                        }
+                    }
 
-            }
+                    @Override
+                    public void onCompleted() {
+                        System.out.println("Subscribed to DeleteTask");
+                    }
 
-            @Override
-            public void onFailure(@NotNull ApolloException e) {
-                if (e.getMessage().equals("HTTP 403 Forbidden")) {
-                    reAuthorise();
-                }
-            }
+                    @Override
+                    public void onTerminated() {
+                        System.out.println("DeleteTask subscription terminated");
+                    }
 
-            @Override
-            public void onCompleted() {
-                System.out.println("Subscribed to DeleteTask");
-            }
-
-            @Override
-            public void onTerminated() {
-                System.out.println("DeleteTask subscription terminated");
-            }
-
-            @Override
-            public void onConnected() {
-                System.out.println("Connected to DeleteTask subscription");
-            }
-        });
+                    @Override
+                    public void onConnected() {
+                        System.out.println("Connected to DeleteTask subscription");
+                    }
+                });
     }
 
     public void subscribeToAddTask() {
+
+
         AddTaskSubscription addTaskSubscription = AddTaskSubscription
                 .builder()
                 .build();
 
-        client.subscribe(addTaskSubscription).execute(new ApolloSubscriptionCall.Callback<AddTaskSubscription.Data>() {
-            @Override
-            public void onResponse(@NotNull Response<AddTaskSubscription.Data> response) {
-                TaskFields dataReceived = response.data().taskAdded().fragments().taskFields;
-                itemList.add(new Item(dataReceived.title(), dataReceived.description(), dataReceived.id()));
+        client.subscribe(addTaskSubscription)
+                .execute(new ApolloSubscriptionCall.Callback<AddTaskSubscription.Data>() {
+                    @Override
+                    public void onResponse(@NotNull Response<AddTaskSubscription.Data> response) {
 
-                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
-            }
+                        TaskFields dataReceived = response.data().taskAdded().fragments().taskFields;
+                        itemList.add(new Item(dataReceived.title(), dataReceived.description(), dataReceived.id()));
 
-            @Override
-            public void onFailure(@NotNull ApolloException e) {
-                if (e.getMessage().equals("HTTP 403 Forbidden")) {
-                    reAuthorise();
-                }
-            }
 
-            @Override
-            public void onCompleted() {
-                System.out.println("Subscribed to AddTask");
-            }
+                        runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
+                    }
 
-            @Override
-            public void onTerminated() {
-                System.out.println("AddTask subscription terminated");
-            }
+                    @Override
+                    public void onFailure(@NotNull ApolloException e) {
+                        if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                            reAuthorise();
+                        }
+                    }
 
-            @Override
-            public void onConnected() {
-                System.out.println("Connected to AddTask subscription");
-            }
-        });
+                    @Override
+                    public void onCompleted() {
+                        System.out.println("Subscribed to AddTask");
+                    }
+
+                    @Override
+                    public void onTerminated() {
+                        System.out.println("AddTask subscription terminated");
+                    }
+
+                    @Override
+                    public void onConnected() {
+                        System.out.println("Connected to AddTask subscription");
+                    }
+                });
 
     }
 
@@ -142,33 +156,40 @@ public class MainActivity extends AppCompatActivity {
 
         final String buttonId = button.getTag().toString();
 
+        AllTasksQuery tasksQuery = AllTasksQuery
+                .builder()
+                .build();
+        client.query(tasksQuery);
+
         DeleteTaskMutation deleteTask = DeleteTaskMutation
                 .builder()
                 .id(buttonId)
                 .build();
 
-        client.mutate(deleteTask).enqueue(new ApolloCall.Callback<DeleteTaskMutation.Data>() {
-            @Override
-            public void onResponse(@NotNull final Response<DeleteTaskMutation.Data> response) {
+        client.mutate(deleteTask)
+                .refetchQueries(tasksQuery)
+                .enqueue(new ApolloCall.Callback<DeleteTaskMutation.Data>() {
+                    @Override
+                    public void onResponse(@NotNull final Response<DeleteTaskMutation.Data> response) {
 
-                for (Item item : itemList) {
-                    if (response.data() != null && item.getId().equals(response.data().deleteTask())) {
-                        itemList.remove(item);
-                        break;
+                        for (Item item : itemList) {
+                            if (response.data() != null && item.getId().equals(response.data().deleteTask())) {
+                                itemList.remove(item);
+                                break;
+                            }
+                        }
+
+                        runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
+
                     }
-                }
 
-                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
-
-            }
-
-            @Override
-            public void onFailure(@NotNull ApolloException e) {
-                if (e.getMessage().equals("HTTP 403 Forbidden")) {
-                    reAuthorise();
-                }
-            }
-        });
+                    @Override
+                    public void onFailure(@NotNull ApolloException e) {
+                        if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                            reAuthorise();
+                        }
+                    }
+                });
     }
 
     public void addTaskActivity(View view) {
@@ -178,51 +199,70 @@ public class MainActivity extends AppCompatActivity {
 
     public void getTasks() {
 
+        ResponseFetcher onlineResponse = ApolloResponseFetchers.NETWORK_ONLY;
+
+        if (!isOnline()) {
+            onlineResponse = ApolloResponseFetchers.CACHE_ONLY;
+        }
+
         AllTasksQuery tasksQuery = AllTasksQuery
                 .builder()
                 .build();
 
-        client.query(tasksQuery).enqueue(new ApolloCall.Callback<AllTasksQuery.Data>() {
-            @Override
-            public void onResponse(@NotNull Response<AllTasksQuery.Data> response) {
-                final int dataLength = response.data().allTasks().size();
+        client.query(tasksQuery)
+                .responseFetcher(onlineResponse)
+                .enqueue(new ApolloCall.Callback<AllTasksQuery.Data>() {
+                    @Override
+                    public void onResponse(@NotNull Response<AllTasksQuery.Data> response) {
+                        final int dataLength = response.data().allTasks().size();
+                        for (int i = 0; i < dataLength; i++) {
+                            TaskFields dataReceived = response.data().allTasks().get(i).fragments().taskFields();
+                            taskTitle = dataReceived.title();
+                            taskDescription = dataReceived.description();
+                            taskId = dataReceived.id();
+                            itemList.add(new Item(taskTitle, taskDescription, taskId));
+                        }
 
-                for (int i = 0; i < dataLength; i++) {
-                    TaskFields dataReceived = response.data().allTasks().get(i).fragments().taskFields();
-                    taskTitle = dataReceived.title();
-                    taskDescription = dataReceived.description();
-                    taskId = dataReceived.id();
-                    itemList.add(new Item(taskTitle, taskDescription, taskId));
-                }
-                runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
-            }
+                        runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
+                    }
 
-            @Override
-            public void onFailure(@NotNull ApolloException e) {
-                if (e.getMessage().equals("HTTP 403 Forbidden")) {
-                    reAuthorise();
-                }
-            }
-        });
+                    @Override
+                    public void onFailure(@NotNull ApolloException e) {
+                        if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                            reAuthorise();
+                        }
+                    }
+                });
     }
 
-    public void reAuthorise(){
+    public void reAuthorise() {
         RE_AUTH = 403;
         Intent redirectToRefreshToken = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(redirectToRefreshToken);
     }
 
-    public void setupClient(){
+    public void setupClient() {
         String token = "Bearer " + mAuthStateManager.getCurrent().getAccessToken();
-        client = Client.setupApollo(mobileService.getGraphqlServer(), token);
+        client = Client.setupApollo(mobileService.getGraphqlServer(), token, getApplicationContext());
     }
 
-    public ItemAdapter getAdapter(){
+    public ItemAdapter getAdapter() {
         itemList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         itemAdapter = new ItemAdapter(this, itemList);
 
         return itemAdapter;
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
+
+        if (networkInfo != null && networkInfo.isConnectedOrConnecting()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

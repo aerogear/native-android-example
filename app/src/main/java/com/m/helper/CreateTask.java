@@ -10,9 +10,11 @@ import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.m.androidNativeApp.CreateTaskMutation;
+import com.m.androidNativeApp.MainActivity;
 import com.m.androidNativeApp.R;
 
 import org.jetbrains.annotations.NotNull;
+
 import static com.m.androidNativeApp.MainActivity.client;
 import static com.m.helper.LoginActivity.RE_AUTH;
 
@@ -51,6 +53,7 @@ public class CreateTask extends Activity {
             }
         });
 
-        finish();
+        Intent redirectToRefreshToken = new Intent(CreateTask.this, MainActivity.class);
+        startActivity(redirectToRefreshToken);
     }
 }
