@@ -28,7 +28,6 @@
         <activity android:name="com.m.androidNativeApp.MainActivity">
             <intent-filter>
                 <action android:name="com.m.androidNativeApp.MainActivity" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

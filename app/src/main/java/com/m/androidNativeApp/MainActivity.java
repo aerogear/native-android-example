@@ -29,6 +29,7 @@ import com.m.helper.Item;
 import com.m.helper.ItemAdapter;
 import com.m.androidNativeApp.fragment.TaskFields;
 import com.m.helper.LoginActivity;
+import com.m.helper.MobileService;
 import com.m.push.NotifyingHandler;
 import com.m.push.PushApplication;
 
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
     private List<Item> itemList;
 
     private String TAG = "Main Activity";
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +85,6 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
             }
         });
 
-        
-        itemList = new ArrayList<>();
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        itemAdapter = new ItemAdapter(this, itemList);
 
         MainActivity.this.runOnUiThread(() -> recyclerView.setAdapter(itemAdapter));
 
@@ -303,6 +299,7 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
             return false;
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
