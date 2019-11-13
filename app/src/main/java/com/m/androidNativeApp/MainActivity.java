@@ -29,7 +29,6 @@ import com.m.helper.Item;
 import com.m.helper.ItemAdapter;
 import com.m.androidNativeApp.fragment.TaskFields;
 import com.m.helper.LoginActivity;
-import com.m.helper.MobileService;
 import com.m.push.NotifyingHandler;
 import com.m.push.PushApplication;
 
@@ -57,13 +56,23 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
     private ItemAdapter itemAdapter;
     private List<Item> itemList;
 
-    private String TAG = "Main Activity";
-    private Context context;
+    private String TAG = "Main Activity: APP:";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        if (getIntent() != null) {
+            Bundle bundle = getIntent().getExtras();
+            if (bundle != null && bundle.getString(UnifiedPushMessage.ALERT_KEY) != null) {
+                Toast.makeText(getApplicationContext(),
+                        bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
+            }
+
+        }
+
         setupClient();
 
         itemAdapter = getAdapter();
@@ -73,8 +82,6 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
             @Override
             public void onSuccess(Void data) {
                 Log.d(TAG, "Registration Succeeded");
-                Toast.makeText(getApplicationContext(),
-                        "Yay, Device registered", Toast.LENGTH_LONG).show();
             }
 
             @Override
