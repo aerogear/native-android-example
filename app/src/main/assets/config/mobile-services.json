@@ -4,6 +4,18 @@
   "services": [
     {
       "config": {
+        "android": {
+          "variantId": "dac4b9cd-14fa-4746-870f-cee892681ce6",
+          "variantSecret": "feab9889-91df-48d4-9b2e-41bfffa905bc"
+        }
+      },
+      "id": "2e499c2b-060d-11ea-ab9a-067548568095",
+      "name": "push",
+      "type": "push",
+      "url": "https://unifiedpush-unifiedpush-proxy-mobile-unifiedpush.apps.ire-219e.open.redhat.com"
+    },
+    {
+      "config": {
         "auth-server-url": "https://sso-user-sso.apps.ire-219e.open.redhat.com/auth",
         "confidential-port": 0,
         "public-client": true,

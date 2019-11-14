@@ -11,8 +11,10 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
@@ -27,7 +29,15 @@ import com.m.helper.Item;
 import com.m.helper.ItemAdapter;
 import com.m.androidNativeApp.fragment.TaskFields;
 import com.m.helper.LoginActivity;
+import com.m.push.NotifyingHandler;
+import com.m.push.PushApplication;
 
+
+import org.jboss.aerogear.android.core.Callback;
+import org.jboss.aerogear.android.unifiedpush.MessageHandler;
+import org.jboss.aerogear.android.unifiedpush.PushRegistrar;
+import org.jboss.aerogear.android.unifiedpush.RegistrarManager;
+import org.jboss.aerogear.android.unifiedpush.fcm.UnifiedPushMessage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -37,26 +47,55 @@ import static com.m.helper.LoginActivity.mAuthStateManager;
 import static com.m.helper.LoginActivity.mobileService;
 
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements MessageHandler {
+
     public static ApolloClient client;
     private String taskTitle, taskDescription, taskId;
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
     private List<Item> itemList;
 
+    private String TAG = "Main Activity: APP:";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         setupClient();
+        setupPush();
 
         itemAdapter = getAdapter();
-
         MainActivity.this.runOnUiThread(() -> recyclerView.setAdapter(itemAdapter));
 
         getTasks();
         subscribeToAddTask();
         subscribeToDeleteTask();
+        toastStartUpPushNotification();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        RegistrarManager.registerMainThreadHandler(this);
+        RegistrarManager.unregisterBackgroundThreadHandler(NotifyingHandler.instance);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        RegistrarManager.unregisterMainThreadHandler(this);
+        RegistrarManager.registerBackgroundThreadHandler(NotifyingHandler.instance);
+    }
+
+    @Override
+    public void onMessage(Context context, Bundle bundle) {
+        // display the message contained in the payload
+        Toast.makeText(getApplicationContext(),
+                bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
+
     }
 
     public void subscribeToDeleteTask() {
@@ -263,6 +302,48 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Register application with Push service
+     */
+    private void setupPush(){
+        PushApplication application = (PushApplication) getApplication();
+        PushRegistrar pushRegistrar = application.getPushRegistrar();
+        pushRegistrar.register(getApplicationContext(), new Callback<Void>() {
+
+            /**
+             * Handle a successful registration with Push service
+             */
+            @Override
+            public void onSuccess(Void data) {
+                Log.d(TAG, "Registration Succeeded");
+            }
+
+            /**
+             * Handle a failed registration with Push service
+             */
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+                Toast.makeText(getApplicationContext(),
+                        "Ops, something is wrong :(", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    /**
+     * Sample method to handle the notifications when the app has been started.
+     */
+    public void toastStartUpPushNotification(){
+        if (getIntent() != null) {
+            Bundle bundle = getIntent().getExtras();
+            if (bundle != null && bundle.getString(UnifiedPushMessage.ALERT_KEY) != null) {
+                Toast.makeText(getApplicationContext(),
+                        bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
+            }
+
         }
     }
 }
