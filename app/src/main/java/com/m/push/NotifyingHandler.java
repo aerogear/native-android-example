@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.os.Bundle;
+import android.util.Log;
 //import android.support.v4.app.NotificationCompat;
 
 import androidx.core.app.NotificationCompat;
@@ -38,8 +39,7 @@ public class NotifyingHandler implements MessageHandler {
 
         String message = bundle.getString(UnifiedPushMessage.ALERT_KEY);
 
-        PushApplication application = (PushApplication) context.getApplicationContext();
-        application.addMessage(message);
+        Log.d("APP: Notification", message);
 
         notify(bundle);
     }

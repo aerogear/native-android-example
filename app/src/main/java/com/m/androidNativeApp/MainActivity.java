@@ -79,14 +79,14 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
     @Override
     protected void onResume() {
         super.onResume();
-        RegistrarManager.registerMainThreadHandler(this); // 1
+        RegistrarManager.registerMainThreadHandler(this);
         RegistrarManager.unregisterBackgroundThreadHandler(NotifyingHandler.instance);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        RegistrarManager.unregisterMainThreadHandler(this); // 2
+        RegistrarManager.unregisterMainThreadHandler(this);
         RegistrarManager.registerBackgroundThreadHandler(NotifyingHandler.instance);
     }
 

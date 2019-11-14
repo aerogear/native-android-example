@@ -25,8 +25,4 @@ public class PushApplication extends Application {
         return RegistrarManager.getRegistrar(PUSH_REGISTRAR_NAME);
     }
 
-    public void addMessage(String message){
-        System.out.println("APP: MESSAGE: " + message);
-    }
-
 }
