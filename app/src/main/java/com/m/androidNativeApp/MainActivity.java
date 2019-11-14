@@ -63,12 +63,20 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        /**
+         * Setting up client
+         */
         setupClient();
         setupPush();
 
         itemAdapter = getAdapter();
         MainActivity.this.runOnUiThread(() -> recyclerView.setAdapter(itemAdapter));
 
+
+        /**
+         * Running basic queries and subscribing to add task and delete task.
+         */
         getTasks();
         subscribeToAddTask();
         subscribeToDeleteTask();
@@ -98,14 +106,184 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
     }
 
+
+    /**
+     * This is a method that is used in order to get all the data from the GraphQL server
+     */
+    public void getTasks() {
+
+
+        /**
+         * A simple check to use different network policy depending on our device being in online or
+         * offline mode.
+         */
+        ResponseFetcher onlineResponse = ApolloResponseFetchers.NETWORK_ONLY;
+
+        if (!isOnline()) {
+            onlineResponse = ApolloResponseFetchers.CACHE_ONLY;
+        }
+
+
+        /**
+         * Creating a tasksQuery.
+         */
+        AllTasksQuery tasksQuery = AllTasksQuery
+                .builder()
+                .build();
+
+
+        /**
+         * Using tasksQuery above with our Apollo Client to retrieve data from GraphQL server.
+         */
+        client.query(tasksQuery)
+                .responseFetcher(onlineResponse)
+                .enqueue(new ApolloCall.Callback<AllTasksQuery.Data>() {
+
+                    /**
+                     * If the response was successful we can fill our item list data with data
+                     * receivec from the server.
+                     * @param response
+                     *          This is the response from server that contains all the data we have
+                     *          asked for in our tasksQuery.
+                     */
+                    @Override
+                    public void onResponse(@NotNull Response<AllTasksQuery.Data> response) {
+                        final int dataLength = response.data().allTasks().size();
+                        for (int i = 0; i < dataLength; i++) {
+                            TaskFields dataReceived = response.data().allTasks().get(i).fragments().taskFields();
+                            taskTitle = dataReceived.title();
+                            taskDescription = dataReceived.description();
+                            taskId = dataReceived.id();
+                            itemList.add(new Item(taskTitle, taskDescription, taskId));
+                        }
+
+                        runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
+                    }
+
+                    /**
+                     * If we don't get anything back from the server onFailure is going to be initialized
+                     * where we can handle any errors received.
+                     * @param e
+                     *        Error received.
+                     */
+                    @Override
+                    public void onFailure(@NotNull ApolloException e) {
+                        if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                            reAuthorise();
+                        }
+                    }
+                });
+    }
+
+
+    /**
+     * Redirecting to addTaskActivity
+     * @param view
+     */
+    public void addTaskActivity(View view) {
+        Intent launchActivity1 = new Intent(this, CreateTask.class);
+        startActivity(launchActivity1);
+    }
+
+    /**
+     * This is our main DeleteTask function, on creation of each task each delete button has been
+     * assigned a TAG equal to the taskID which autoincrement by the GraphQL server.
+     * @param view
+     */
+    public void deleteTask(View view) {
+
+        final Button button = view.findViewById(R.id.deleteButton);
+
+        final String buttonId = button.getTag().toString();
+
+
+        /**
+         * AllTasksQuery is rebuild here just to be accessible by refetchQueries used in deleteTask
+         * mutation builder.
+         */
+        AllTasksQuery tasksQuery = AllTasksQuery
+                .builder()
+                .build();
+        client.query(tasksQuery);
+
+        /**
+         * Building deleteTask mutation that is going to be send to the GraphQL server
+         */
+        DeleteTaskMutation deleteTask = DeleteTaskMutation
+                .builder()
+                .id(buttonId)
+                .build();
+
+        /**
+         * Using deleteTask above with our Apollo Client to delete data from GraphQL server.
+         */
+        client.mutate(deleteTask)
+                .refetchQueries(tasksQuery)
+                .enqueue(new ApolloCall.Callback<DeleteTaskMutation.Data>() {
+
+                    /**
+                     * If deleteTask mutation was successful we can delete data from our itemList.
+                     * @param response
+                     *          This is the response from server that contains all the data we have
+                     *          asked after our deleteTask has completed.
+                     */
+                    @Override
+                    public void onResponse(@NotNull final Response<DeleteTaskMutation.Data> response) {
+
+                        for (Item item : itemList) {
+                            if (response.data() != null && item.getId().equals(response.data().deleteTask())) {
+                                itemList.remove(item);
+                                break;
+                            }
+                        }
+
+                        runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
+
+                    }
+
+
+                    /**
+                     * If we don't get anything back from the server onFailure is going to be initialized
+                     * where we can handle any errors received.
+                     * @param e
+                     *        Error received.
+                     */
+                    @Override
+                    public void onFailure(@NotNull ApolloException e) {
+                        if (e.getMessage().equals("HTTP 403 Forbidden")) {
+                            reAuthorise();
+                        }
+                    }
+                });
+    }
+
+
+    /**
+     * Subscription to deleteTask queries.
+     */
     public void subscribeToDeleteTask() {
 
+
+        /**
+         * Building our subscription that is going to be send to GraphQL server.
+         */
         DeleteTaskSubscription deleteTaskSubscription = DeleteTaskSubscription
                 .builder()
                 .build();
 
+
+        /**
+         * Using above subscription with the client to subscribe to taskDeleted mutation.
+         */
         client.subscribe(deleteTaskSubscription)
                 .execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
+
+                    /**
+                     * If deleteTaskSubscription was successful we can delete data from our itemList.
+                     * @param response
+                     *        This is the response from server that contains all the data we have
+                     *        asked after our deleteTaskSubscription had received data.
+                     */
                     @Override
                     public void onResponse(@NotNull Response<DeleteTaskSubscription.Data> response) {
 
@@ -121,6 +299,13 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
                     }
 
+
+                    /**
+                     * If we don't get anything back from the server onFailure is going to be initialized
+                     * where we can handle any errors received.
+                     * @param e
+                     *        Error received.
+                     */
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
                         if (e.getMessage().equals("HTTP 403 Forbidden")) {
@@ -128,16 +313,25 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
                         }
                     }
 
+                    /**
+                     * onCompleted is triggered once subscription has been completed.
+                     */
                     @Override
                     public void onCompleted() {
                         System.out.println("Subscribed to DeleteTask");
                     }
 
+                    /**
+                     * onTerminated is triggered once subscription has been terminated.
+                     */
                     @Override
                     public void onTerminated() {
                         System.out.println("DeleteTask subscription terminated");
                     }
 
+                    /**
+                     * onConnected is triggered once we have connected to subscriptions.
+                     */
                     @Override
                     public void onConnected() {
                         System.out.println("Connected to DeleteTask subscription");
@@ -145,15 +339,32 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
                 });
     }
 
+
+    /**
+     * Subscription to createTask.
+     */
     public void subscribeToAddTask() {
 
 
+        /**
+         * Building our subscription that is going to be send to GraphQL server.
+         */
         AddTaskSubscription addTaskSubscription = AddTaskSubscription
                 .builder()
                 .build();
 
+
+        /**
+         * Using above subscription with the client to subscribe to taskDeleted mutation.
+         */
         client.subscribe(addTaskSubscription)
                 .execute(new ApolloSubscriptionCall.Callback<AddTaskSubscription.Data>() {
+                    /**
+                     * If addTaskSubscription was successful we can add data from our itemList.
+                     * @param response
+                     *        This is the response from server that contains all the data we have
+                     *        asked after our addTaskSubscription had received data.
+                     */
                     @Override
                     public void onResponse(@NotNull Response<AddTaskSubscription.Data> response) {
 
@@ -164,6 +375,13 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
                         runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
                     }
 
+
+                    /**
+                     * If we don't get anything back from the server onFailure is going to be initialized
+                     * where we can handle any errors received.
+                     * @param e
+                     *        Error received.
+                     */
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
                         if (e.getMessage().equals("HTTP 403 Forbidden")) {
@@ -171,16 +389,25 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
                         }
                     }
 
+                    /**
+                     * onCompleted is triggered once subscription has been completed.
+                     */
                     @Override
                     public void onCompleted() {
                         System.out.println("Subscribed to AddTask");
                     }
 
+                    /**
+                     * onTerminated is triggered once subscription has been terminated.
+                     */
                     @Override
                     public void onTerminated() {
                         System.out.println("AddTask subscription terminated");
                     }
 
+                    /**
+                     * onConnected is triggered once we have connected to subscriptions.
+                     */
                     @Override
                     public void onConnected() {
                         System.out.println("Connected to AddTask subscription");
@@ -189,102 +416,33 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
     }
 
-    public void deleteTask(View view) {
 
-        final Button button = view.findViewById(R.id.deleteButton);
-
-        final String buttonId = button.getTag().toString();
-
-        AllTasksQuery tasksQuery = AllTasksQuery
-                .builder()
-                .build();
-        client.query(tasksQuery);
-
-        DeleteTaskMutation deleteTask = DeleteTaskMutation
-                .builder()
-                .id(buttonId)
-                .build();
-
-        client.mutate(deleteTask)
-                .refetchQueries(tasksQuery)
-                .enqueue(new ApolloCall.Callback<DeleteTaskMutation.Data>() {
-                    @Override
-                    public void onResponse(@NotNull final Response<DeleteTaskMutation.Data> response) {
-
-                        for (Item item : itemList) {
-                            if (response.data() != null && item.getId().equals(response.data().deleteTask())) {
-                                itemList.remove(item);
-                                break;
-                            }
-                        }
-
-                        runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
-
-                    }
-
-                    @Override
-                    public void onFailure(@NotNull ApolloException e) {
-                        if (e.getMessage().equals("HTTP 403 Forbidden")) {
-                            reAuthorise();
-                        }
-                    }
-                });
-    }
-
-    public void addTaskActivity(View view) {
-        Intent launchActivity1 = new Intent(this, CreateTask.class);
-        startActivity(launchActivity1);
-    }
-
-    public void getTasks() {
-
-        ResponseFetcher onlineResponse = ApolloResponseFetchers.NETWORK_ONLY;
-
-        if (!isOnline()) {
-            onlineResponse = ApolloResponseFetchers.CACHE_ONLY;
-        }
-
-        AllTasksQuery tasksQuery = AllTasksQuery
-                .builder()
-                .build();
-
-        client.query(tasksQuery)
-                .responseFetcher(onlineResponse)
-                .enqueue(new ApolloCall.Callback<AllTasksQuery.Data>() {
-                    @Override
-                    public void onResponse(@NotNull Response<AllTasksQuery.Data> response) {
-                        final int dataLength = response.data().allTasks().size();
-                        for (int i = 0; i < dataLength; i++) {
-                            TaskFields dataReceived = response.data().allTasks().get(i).fragments().taskFields();
-                            taskTitle = dataReceived.title();
-                            taskDescription = dataReceived.description();
-                            taskId = dataReceived.id();
-                            itemList.add(new Item(taskTitle, taskDescription, taskId));
-                        }
-
-                        runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
-                    }
-
-                    @Override
-                    public void onFailure(@NotNull ApolloException e) {
-                        if (e.getMessage().equals("HTTP 403 Forbidden")) {
-                            reAuthorise();
-                        }
-                    }
-                });
-    }
-
+    /**
+     * This is called when we receive a 403 error from the server due to being logged out on our SSO
+     * or token is expired. Once called, user is redirected to AppAuth Activity.
+     */
     public void reAuthorise() {
         RE_AUTH = 403;
         Intent redirectToRefreshToken = new Intent(MainActivity.this, AppAuthActivity.class);
         startActivity(redirectToRefreshToken);
     }
 
+
+    /**
+     * Our clients accepts a serverUrl, a token and application context to interact with so we need
+     * to pass these in our setupApollo method
+     */
     public void setupClient() {
         String token = "Bearer " + mAuthStateManager.getCurrent().getAccessToken();
         client = Client.setupApollo(mobileService.getGraphqlServer(), token, getApplicationContext());
     }
 
+
+    /**
+     * Setting up the itemAdapter.
+     * @return
+     *    Returns itemAdater.
+     */
     public ItemAdapter getAdapter() {
         itemList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerView);
@@ -294,6 +452,10 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
         return itemAdapter;
     }
 
+
+    /**
+     * A check called before getTasks() to check whether device is in online of offline mode.
+     */
     public boolean isOnline() {
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connManager.getActiveNetworkInfo();

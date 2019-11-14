@@ -26,7 +26,8 @@ import okhttp3.Request;
 public class Client {
 
     /**
-     * Setting up Apollo Client
+     * Setting up Apollo Client to interact with our Graphql queries, mutations and subscriptions
+     * in MainActivity.
      * @param serverUrl
      *           Server URL provided in mobile-service.json, in our example passed in as a parameter
      *           in MainActivity to construct Apollo Client.
