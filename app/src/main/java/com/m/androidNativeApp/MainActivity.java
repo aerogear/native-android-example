@@ -23,14 +23,14 @@ import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
 import com.apollographql.apollo.fetcher.ResponseFetcher;
-import com.m.helper.Client;
+import com.m.services.dataSync.Client;
 import com.m.helper.CreateTask;
 import com.m.helper.Item;
 import com.m.helper.ItemAdapter;
 import com.m.androidNativeApp.fragment.TaskFields;
-import com.m.helper.LoginActivity;
 import com.m.push.NotifyingHandler;
 import com.m.push.PushApplication;
+import com.m.services.appAuth.AppAuthActivity;
 
 
 import org.jboss.aerogear.android.core.Callback;
@@ -42,9 +42,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-import static com.m.helper.LoginActivity.RE_AUTH;
-import static com.m.helper.LoginActivity.mAuthStateManager;
-import static com.m.helper.LoginActivity.mobileService;
+import static com.m.services.appAuth.AppAuthActivity.RE_AUTH;
+import static com.m.services.appAuth.AppAuthActivity.mAuthStateManager;
+import static com.m.services.appAuth.AppAuthActivity.mobileService;
 
 
 
@@ -276,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
     public void reAuthorise() {
         RE_AUTH = 403;
-        Intent redirectToRefreshToken = new Intent(MainActivity.this, LoginActivity.class);
+        Intent redirectToRefreshToken = new Intent(MainActivity.this, AppAuthActivity.class);
         startActivity(redirectToRefreshToken);
     }
 
