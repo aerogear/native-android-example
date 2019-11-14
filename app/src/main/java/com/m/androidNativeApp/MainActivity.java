@@ -67,12 +67,19 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /**
+         * Setting up client
+         */
         setupClient();
         setupPush();
 
         itemAdapter = getAdapter();
         MainActivity.this.runOnUiThread(() -> recyclerView.setAdapter(itemAdapter));
 
+
+        /**
+         * Running basic queries and subscribing to add task and delete task.
+         */
         getTasks();
         subscribeToAddTask();
         subscribeToDeleteTask();
@@ -241,10 +248,18 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
      */
     public void subscribeToDeleteTask() {
 
+
+        /**
+         * Building our subscription that is going to be send to GraphQL server.
+         */
         DeleteTaskSubscription deleteTaskSubscription = DeleteTaskSubscription
                 .builder()
                 .build();
 
+
+        /**
+         * Using above subscription with the client to subscribe to taskDeleted mutation.
+         */
         client.subscribe(deleteTaskSubscription)
                 .execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
 
@@ -316,10 +331,17 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
      */
     public void subscribeToAddTask() {
 
+        /**
+         * Building our subscription that is going to be send to GraphQL server.
+         */
         AddTaskSubscription addTaskSubscription = AddTaskSubscription
                 .builder()
                 .build();
 
+
+        /**
+         * Using above subscription with the client to subscribe to taskDeleted mutation.
+         */
         client.subscribe(addTaskSubscription)
                 .execute(new ApolloSubscriptionCall.Callback<AddTaskSubscription.Data>() {
                     /**
