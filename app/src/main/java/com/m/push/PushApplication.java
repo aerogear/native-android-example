@@ -8,7 +8,7 @@ import org.jboss.aerogear.android.unifiedpush.fcm.AeroGearFCMPushJsonConfigurati
 
 public class PushApplication extends Application {
 
-    private static final String PUSH_REGISTRAR_NAME = "myPushRegistar";
+    private static final String PUSH_REGISTRAR_NAME = "myPushRegistrar";
 
     @Override
     public void onCreate() {
@@ -21,7 +21,7 @@ public class PushApplication extends Application {
     }
 
     // Accessor method for Activities to access the 'PushRegistrar' object
-    public PushRegistrar getPushRegistar() {
+    public PushRegistrar getPushRegistrar() {
         return RegistrarManager.getRegistrar(PUSH_REGISTRAR_NAME);
     }
 

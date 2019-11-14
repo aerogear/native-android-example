@@ -63,41 +63,39 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        if (getIntent() != null) {
-            Bundle bundle = getIntent().getExtras();
-            if (bundle != null && bundle.getString(UnifiedPushMessage.ALERT_KEY) != null) {
-                Toast.makeText(getApplicationContext(),
-                        bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
-            }
-
-        }
-
         setupClient();
+        setupPush();
 
         itemAdapter = getAdapter();
-        PushApplication application = (PushApplication) getApplication();
-        PushRegistrar pushRegistar = application.getPushRegistar();
-        pushRegistar.register(getApplicationContext(), new Callback<Void>() {
-            @Override
-            public void onSuccess(Void data) {
-                Log.d(TAG, "Registration Succeeded");
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.e(TAG, e.getMessage(), e);
-                Toast.makeText(getApplicationContext(),
-                        "Ops, something is wrong :(", Toast.LENGTH_LONG).show();
-            }
-        });
-
-
         MainActivity.this.runOnUiThread(() -> recyclerView.setAdapter(itemAdapter));
 
         getTasks();
         subscribeToAddTask();
         subscribeToDeleteTask();
+        toastStartUpPushNotification();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        RegistrarManager.registerMainThreadHandler(this); // 1
+        RegistrarManager.unregisterBackgroundThreadHandler(NotifyingHandler.instance);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        RegistrarManager.unregisterMainThreadHandler(this); // 2
+        RegistrarManager.registerBackgroundThreadHandler(NotifyingHandler.instance);
+    }
+
+    @Override
+    public void onMessage(Context context, Bundle bundle) {
+        // display the message contained in the payload
+        Toast.makeText(getApplicationContext(),
+                bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
+
     }
 
     public void subscribeToDeleteTask() {
@@ -307,26 +305,45 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        RegistrarManager.registerMainThreadHandler(this); // 1
-        RegistrarManager.unregisterBackgroundThreadHandler(NotifyingHandler.instance);
+    /**
+     * Register application with Push service
+     */
+    private void setupPush(){
+        PushApplication application = (PushApplication) getApplication();
+        PushRegistrar pushRegistrar = application.getPushRegistrar();
+        pushRegistrar.register(getApplicationContext(), new Callback<Void>() {
+
+            /**
+             * Handle a successful registration with Push service
+             */
+            @Override
+            public void onSuccess(Void data) {
+                Log.d(TAG, "Registration Succeeded");
+            }
+
+            /**
+             * Handle a failed registration with Push service
+             */
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+                Toast.makeText(getApplicationContext(),
+                        "Ops, something is wrong :(", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        RegistrarManager.unregisterMainThreadHandler(this); // 2
-        RegistrarManager.registerBackgroundThreadHandler(NotifyingHandler.instance);
+    /**
+     * Sample method to handle the notifications when the app has been started.
+     */
+    public void toastStartUpPushNotification(){
+        if (getIntent() != null) {
+            Bundle bundle = getIntent().getExtras();
+            if (bundle != null && bundle.getString(UnifiedPushMessage.ALERT_KEY) != null) {
+                Toast.makeText(getApplicationContext(),
+                        bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
+            }
+
+        }
     }
-
-    @Override
-    public void onMessage(Context context, Bundle bundle) {
-        // display the message contained in the payload
-        Toast.makeText(getApplicationContext(),
-                bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
-
-    }
-
 }

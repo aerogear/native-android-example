@@ -26,6 +26,12 @@ public class NotifyingHandler implements MessageHandler {
     public NotifyingHandler() {
     }
 
+    /**
+     * Handle received notifications
+     * This is called when app is both in the Foreground and Background
+     * @param context
+     * @param bundle
+     */
     @Override
     public void onMessage(Context context, Bundle bundle) {
         this.context = context;
@@ -38,6 +44,10 @@ public class NotifyingHandler implements MessageHandler {
         notify(bundle);
     }
 
+    /**
+     * Configure how the notification is displayed when the app is in the background
+     * @param bundle
+     */
     private void notify(Bundle bundle) {
 
         NotificationManager mNotificationManager = (NotificationManager)
