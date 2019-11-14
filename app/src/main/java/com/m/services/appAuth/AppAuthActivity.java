@@ -9,7 +9,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.m.helper.Auth.AuthStateManager;
+import com.m.services.appAuth.AuthStateManager;
 import com.m.androidNativeApp.MainActivity;
 
 import net.openid.appauth.AuthState;
