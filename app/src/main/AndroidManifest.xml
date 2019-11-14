@@ -33,10 +33,18 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.m.helper.CreateTask"
+            android:name="com.m.dataSync.CreateTask"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="com.m.androidNativeApp.CreateTask"/>
+                <category android:name="android.intent.category.Launcher"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.m.dataSync.SyncActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="com.m.androidNativeApp.SyncActivity"/>
                 <category android:name="android.intent.category.Launcher"/>
             </intent-filter>
         </activity>

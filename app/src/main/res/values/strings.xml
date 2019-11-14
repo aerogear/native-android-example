@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Android App</string>
+    <string name="delete">Delete</string>
+    <string name="textview">TextView</string>
 </resources>

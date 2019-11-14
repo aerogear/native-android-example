@@ -1,4 +1,4 @@
-package com.m.services.dataSync;
+package com.m.dataSync;
 
 import android.content.Context;
 
@@ -25,23 +25,19 @@ import okhttp3.Request;
 
 public class Client {
 
-    /**
-     * Setting up Apollo Client to interact with our Graphql queries, mutations and subscriptions
-     * in MainActivity. Resolver that can be used to access records from cache, normalized cache for
-     * our app to enable offline support for our application. OkHttp to handle network requests for
-     * our client. Setting up authorization to support subscriptions, Building Apollo Client, passing
-     * in serverUrl, normalized cache, okHttp client and setting up subscriptions.
-     * @param serverUrl
-     *           Server URL provided in mobile-service.json, in our example passed in as a parameter
-     *           in MainActivity to construct Apollo Client.
-     * @param authHeader
-     *           Token received.
-     * @param context
-     *          Context required for normalized cache.
-     * @return
-     *          Returns interceptor chain from OkHttp
-     */
-    public static ApolloClient setupApollo(String serverUrl, String authHeader, Context context) {
+    private static ApolloClient INSTANCE;
+
+    public static void init(String serverUrl, String authHeader, Context context){
+        INSTANCE = setupApollo(serverUrl, authHeader, context);
+
+    }
+
+    public static ApolloClient getInstance(){
+        return INSTANCE;
+    }
+
+    private static ApolloClient setupApollo(String serverUrl, String authHeader, Context context) {
+
 
         CacheKeyResolver resolver = new CacheKeyResolver() {
             @NotNull
@@ -66,7 +62,6 @@ public class Client {
         };
 
         String DB_CACHE_NAME = "myapp";
-
         ApolloSqlHelper apolloSqlHelper = new ApolloSqlHelper(context, DB_CACHE_NAME);
 
         NormalizedCacheFactory<LruNormalizedCache> cacheFactory = new LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
