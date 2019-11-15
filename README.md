@@ -5,7 +5,7 @@
 
 This is a sample Android Java application showing use of DataSync, [Keycloak](https://www.keycloak.org/about.html) and Unified Push using native upstream SDK's.
 Application is sending requests to [Ionic showcase server]([https://github.com/aerogear/ionic-showcase/tree/master/server](https://github.com/aerogear/ionic-showcase/tree/master/server)) which is a GraphQL server. For DataSync, application uses Apollo Client to query, mutate and subscribe. [AppAuth](https://github.com/openid/AppAuth-Android) to connect
- with Keycloak and Aerogear SDK for Unified Push support.
+ with Keycloak and [aerogear android push][https://github.com/aerogear/aerogear-android-push/tree/master] for Unified Push support.
 
 ## Implementation
 ### 1. DataSync
@@ -56,7 +56,7 @@ MyGeneratedQuery nameOfMyQuery = MyGeneratedQuery
         .builder()
         .build();
   ```
-  #### Mutation
+#### Mutation
  ```java
  DeleteTaskMutation deleteTask = DeleteTaskMutation
         .builder()
@@ -185,4 +185,37 @@ private void receivedTokenResponse(
 }
 ```
 ### 3. Unifiedpush implementation
+#### External Setup
+For setting up push notifications a [firebase][https://firebase.google.com/] is required. The following information below is need and can be got from the project settings.
+- The `google-services.json` file.
+- Sender ID 
+- Server Key
+
+With in the [Aerogear Unifiefpush Server][https://github.com/aerogear/aerogear-unifiedpush-server] create you application. For creating the application you will need the following information.
+- Sender ID - This is gotten from firebase
+- Server Key - this is gotten from firebase
+
+Once the application variant has been set up the follow information is need to add in the `push-config.json` file.
+- Server URL
+- Variant ID
+- Variant Secret
+- Sender ID (This is the same sender ID as gotten from firebase)
+
+Located in `app/src/main/assets` is a sample of the `push-config.json` file which has the following format. This file is auto located by the [aerogear-android-push][https://github.com/aerogear/aerogear-android-push] package *(this can be configured)*.
+
+```json
+
+{
+  "pushServerURL": "pushServerURL (e.g http(s)//host:port/context)",
+  "android": {
+    "senderID": "senderID (e.g Google Project ID only for android)",
+    "variantID": "variantID (e.g. 1234456-234320)",
+    "variantSecret": "variantSecret (e.g. 1234456-234320)"
+  }
+}
+```
+
+#### Project Setup
+
+
 ### 4. Mobile-services parser
