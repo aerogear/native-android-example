@@ -27,7 +27,10 @@ public class Client {
 
     /**
      * Setting up Apollo Client to interact with our Graphql queries, mutations and subscriptions
-     * in MainActivity.
+     * in MainActivity. Resolver that can be used to access records from cache, normalized cache for
+     * our app to enable offline support for our application. OkHttp to handle network requests for
+     * our client. Setting up authorization to support subscriptions, Building Apollo Client, passing
+     * in serverUrl, normalized cache, okHttp client and setting up subscriptions.
      * @param serverUrl
      *           Server URL provided in mobile-service.json, in our example passed in as a parameter
      *           in MainActivity to construct Apollo Client.
@@ -40,10 +43,6 @@ public class Client {
      */
     public static ApolloClient setupApollo(String serverUrl, String authHeader, Context context) {
 
-
-        /**
-         * Resolver that can be used to access records from cache
-         */
         CacheKeyResolver resolver = new CacheKeyResolver() {
             @NotNull
             @Override
@@ -68,19 +67,11 @@ public class Client {
 
         String DB_CACHE_NAME = "myapp";
 
-
-        /**
-         *  Creating normalized cache for our app to enable offline support for our application
-         */
         ApolloSqlHelper apolloSqlHelper = new ApolloSqlHelper(context, DB_CACHE_NAME);
 
         NormalizedCacheFactory<LruNormalizedCache> cacheFactory = new LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
                 .chain(new SqlNormalizedCacheFactory(apolloSqlHelper));
 
-
-        /**
-         * OkHttp is handling network requests for our client.
-         */
         OkHttpClient okHttpClient = new OkHttpClient
                 .Builder()
                 .addInterceptor(chain -> {
@@ -91,18 +82,9 @@ public class Client {
                 })
                 .build();
 
-
-        /**
-         * Setting up authorization to support subscriptions
-         */
         Map<String, Object> connectionParams = new HashMap<>();
         connectionParams.put("Authorization", authHeader);
 
-
-        /**
-         * Building Apollo Client, passing in serverUrl, normalized cache, okHttp client and setting up
-         * subscription mechanism.
-         */
         return ApolloClient.builder()
                 .enableAutoPersistedQueries(true)
                 .serverUrl(serverUrl)
@@ -111,6 +93,5 @@ public class Client {
                 .subscriptionTransportFactory(new WebSocketSubscriptionTransport.Factory(serverUrl, okHttpClient))
                 .okHttpClient(okHttpClient)
                 .build();
-
     }
 }

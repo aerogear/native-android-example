@@ -3,8 +3,9 @@
 
 ## Introduction
 
-This is a sample Java application showing use of DataSync, SSO and Unified Push using native upstream SDK's.
-Application is using [Ionic showcase server]([https://github.com/aerogear/ionic-showcase/tree/master/server](https://github.com/aerogear/ionic-showcase/tree/master/server)) as it's backend which is a GraphQL server. For DataSync application uses Apollo Client that communicates with the server. AppAuth and Keycloak are used as SSO and Aerogear SDK for Unified Push support.
+This is a sample Android Java application showing use of DataSync, [Keycloak](https://www.keycloak.org/about.html) and Unified Push using native upstream SDK's.
+Application is sending requests to [Ionic showcase server]([https://github.com/aerogear/ionic-showcase/tree/master/server](https://github.com/aerogear/ionic-showcase/tree/master/server)) which is a GraphQL server. For DataSync, application uses Apollo Client to query, mutate and subscribe. [AppAuth](https://github.com/openid/AppAuth-Android) to connect
+ with Keycloak and Aerogear SDK for Unified Push support.
 
 ## Implementation
 ### 1. DataSync
@@ -86,7 +87,7 @@ DeleteTaskSubscription deleteTaskSubscription = DeleteTaskSubscription
 ```
 - We want to use `refetchQueries(myGetQuery)` in mutations just to refetch our get query so cache gets updated.
 
-#### Subscription
+#### Subscriptions
    ```java
    client.subscribe(deleteTaskSubscription)
         .execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
