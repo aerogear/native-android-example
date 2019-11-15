@@ -56,8 +56,11 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
     private ItemAdapter itemAdapter;
     private List<Item> itemList;
 
-    private String TAG = "Main Activity: APP:";
-
+    /**
+     * This function covers initiating client and running initial getTasks query to populate our
+     * view. We also subscribe to addTask and deleteTask mutations.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,10 +72,6 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
         itemAdapter = getAdapter();
         MainActivity.this.runOnUiThread(() -> recyclerView.setAdapter(itemAdapter));
 
-
-        /**
-         * Running basic queries and subscribing to add task and delete task.
-         */
         getTasks();
         subscribeToAddTask();
         subscribeToDeleteTask();
@@ -104,33 +103,22 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
 
     /**
-     * This is a method that is used in order to get all the data from the GraphQL server
+     * This is a method that is used in order to get all the data from the GraphQL server, first
+     * we are performing a simple check to use different network policy depending on our device being in online or
+     * offline mode then creating a tasksQuery and using Apollo Client to execute the query.
      */
     public void getTasks() {
 
-
-        /**
-         * A simple check to use different network policy depending on our device being in online or
-         * offline mode.
-         */
         ResponseFetcher onlineResponse = ApolloResponseFetchers.NETWORK_ONLY;
 
         if (!isOnline()) {
             onlineResponse = ApolloResponseFetchers.CACHE_ONLY;
         }
 
-
-        /**
-         * Creating a tasksQuery.
-         */
         AllTasksQuery tasksQuery = AllTasksQuery
                 .builder()
                 .build();
 
-
-        /**
-         * Using tasksQuery above with our Apollo Client to retrieve data from GraphQL server.
-         */
         client.query(tasksQuery)
                 .responseFetcher(onlineResponse)
                 .enqueue(new ApolloCall.Callback<AllTasksQuery.Data>() {
@@ -183,7 +171,10 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
     /**
      * This is our main DeleteTask function, on creation of each task each delete button has been
-     * assigned a TAG equal to the taskID which autoincrement by the GraphQL server.
+     * assigned a TAG equal to the taskID which autoincrement by the GraphQL server. AllTasksQuery
+     * is rebuild here just to be accessible by refetchQueries used in deleteTask mutation builder.
+     * Next, building deleteTask mutation that is going to be send to the GraphQL server and using
+     * Apollo Client to execute mutation.
      * @param view
      */
     public void deleteTask(View view) {
@@ -192,27 +183,16 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
         final String buttonId = button.getTag().toString();
 
-
-        /**
-         * AllTasksQuery is rebuild here just to be accessible by refetchQueries used in deleteTask
-         * mutation builder.
-         */
         AllTasksQuery tasksQuery = AllTasksQuery
                 .builder()
                 .build();
         client.query(tasksQuery);
 
-        /**
-         * Building deleteTask mutation that is going to be send to the GraphQL server
-         */
         DeleteTaskMutation deleteTask = DeleteTaskMutation
                 .builder()
                 .id(buttonId)
                 .build();
 
-        /**
-         * Using deleteTask above with our Apollo Client to delete data from GraphQL server.
-         */
         client.mutate(deleteTask)
                 .refetchQueries(tasksQuery)
                 .enqueue(new ApolloCall.Callback<DeleteTaskMutation.Data>() {
@@ -255,22 +235,15 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
 
     /**
-     * Subscription to deleteTask queries.
+     * Subscription to deleteTask mutations. First, building our subscription that is going to be send to
+     * GraphQL server and then using build subscription to subscribe to deleteTask mutation.
      */
     public void subscribeToDeleteTask() {
 
-
-        /**
-         * Building our subscription that is going to be send to GraphQL server.
-         */
         DeleteTaskSubscription deleteTaskSubscription = DeleteTaskSubscription
                 .builder()
                 .build();
 
-
-        /**
-         * Using above subscription with the client to subscribe to taskDeleted mutation.
-         */
         client.subscribe(deleteTaskSubscription)
                 .execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
 
@@ -337,22 +310,15 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
 
     /**
-     * Subscription to createTask.
+     * Subscription to addTask mutations. First, building our subscription that is going to be send to
+     * GraphQL server and then using build subscription to subscribe to deleteTask mutation.
      */
     public void subscribeToAddTask() {
 
-
-        /**
-         * Building our subscription that is going to be send to GraphQL server.
-         */
         AddTaskSubscription addTaskSubscription = AddTaskSubscription
                 .builder()
                 .build();
 
-
-        /**
-         * Using above subscription with the client to subscribe to taskDeleted mutation.
-         */
         client.subscribe(addTaskSubscription)
                 .execute(new ApolloSubscriptionCall.Callback<AddTaskSubscription.Data>() {
                     /**

@@ -28,6 +28,11 @@ public class CreateTask extends Activity {
         setContentView(R.layout.add_task);
     }
 
+    /**
+     * Create task mutation is being build with passed in Params of taskTitle, taskDescription
+     * and then passed in to Apollo Client to execute the mutations and redirect back to main activity.
+     * @param view
+     */
     public void createTask(View view) {
         EditText taskTitle = findViewById(R.id.title_input);
         EditText taskDescription = findViewById(R.id.description_input);
