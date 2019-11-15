@@ -109,7 +109,6 @@ public void onFailure(@NotNull ApolloException e) {
     ON FAILURE LOGIC
 }
 ```
-
 ### 2. Keycloak implementation
 To implement Keycloak with our app we have used [AppAuth]([https://github.com/openid/AppAuth-Android](https://github.com/openid/AppAuth-Android)). You will need a keycloak instance running either on OpenShift or you can setup locally on Ionic Showcase server that has been used in our example app
 
