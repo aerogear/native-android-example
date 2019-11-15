@@ -18,6 +18,7 @@ This is a sample Android Java application showing use of DataSync, [Keycloak](ht
 #### Creating client
  - First, we need to build OkHttpClient to handle network requests.
 `authHeader` is the actual token received from the token request during authorization flow. `authHeader` must contain `Bearer:` + token value:  `"Bearer: TOKEN"`
+
   ```java
 OkHttpClient okHttpClient = new OkHttpClient
         .Builder()
