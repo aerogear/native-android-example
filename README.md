@@ -186,22 +186,25 @@ private void receivedTokenResponse(
 ```
 ### 3. Unifiedpush implementation
 #### External Setup
-For setting up push notifications a [firebase][https://firebase.google.com/] is required. The following information below is need and can be got from the project settings.
+For setting up push notifications a [firebase][https://firebase.google.com/] account is required. The following information below is required and can be found the firebase project settings.
+
 - The `google-services.json` file.
 - Sender ID 
 - Server Key
 
 With in the [Aerogear Unifiefpush Server][https://github.com/aerogear/aerogear-unifiedpush-server] create you application. For creating the application you will need the following information.
+
 - Sender ID - This is gotten from firebase
 - Server Key - this is gotten from firebase
 
-Once the application variant has been set up the follow information is need to add in the `push-config.json` file.
+Once the application variant has been set up the follow information is need to add to the `push-config.json` file.
+
 - Server URL
 - Variant ID
 - Variant Secret
 - Sender ID (This is the same sender ID as gotten from firebase)
 
-Located in `app/src/main/assets` is a sample of the `push-config.json` file which has the following format. This file is auto located by the [aerogear-android-push][https://github.com/aerogear/aerogear-android-push] package *(this can be configured)*.
+Located in `app/src/main/assets` folder is a sample of the `push-config.json` file which has the following format. This file is auto located by the [aerogear-android-push][https://github.com/aerogear/aerogear-android-push] package *(this can be configured)*.
 
 ```json
 
@@ -216,6 +219,190 @@ Located in `app/src/main/assets` is a sample of the `push-config.json` file whic
 ```
 
 #### Project Setup
+- Include the [aerogear-android-push][https://github.com/aerogear/aerogear-android-push] package in `build.gradle`.  
 
+```
+dependencies {
+    ...
+    implementation 'org.jboss.aerogear:aerogear-android-push:5.1.0'
+    ...
+}
+```
+- Edit the `AndroidManifest.xml` to allow permissions for the push notifications and change which class the application is launched from.
 
+```xml
+<manifest>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    ...
+    <application
+        android:name="com.m.push.PushApplication"
+        >
+        ...
+    </application>
+</manifest>
+```
+
+- Create the new application launcher class. In this class the a ups registrar is setup. 
+- The `onCreate` function consumes the `push-config.json` file.
+
+```java
+package com.m.push;
+
+import android.app.Application;
+
+import org.jboss.aerogear.android.unifiedpush.PushRegistrar;
+import org.jboss.aerogear.android.unifiedpush.RegistrarManager;
+import org.jboss.aerogear.android.unifiedpush.fcm.AeroGearFCMPushJsonConfiguration;
+
+public class PushApplication extends Application {
+
+    private static final String PUSH_REGISTRAR_NAME = "myPushRegistrar";
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        RegistrarManager.config(PUSH_REGISTRAR_NAME, AeroGearFCMPushJsonConfiguration.class)
+                .loadConfigJson(getApplicationContext())
+                .asRegistrar();
+
+    }
+
+    // Accessor method for Activities to access the 'PushRegistrar' object
+    public PushRegistrar getPushRegistrar() {
+        return RegistrarManager.getRegistrar(PUSH_REGISTRAR_NAME);
+    }
+
+}
+```
+
+- The next step would be to configure the notification handler. This class will implement the MessageHandler interface. 
+- The method to look at here is `onMessage()` which handles what happens when the device receives a message. This function is called both times, when the application is in the Foreground and in the Background. 
+- `notify()` sets up how the message should be displayed in the top notification area. The activity that is opened when the user clicks on the notifications is configured here. Other information such as title and icon can also be set at this time. 
+
+```java 
+package com.m.push;
+
+public class NotifyingHandler implements MessageHandler {
+
+    public static final int NOTIFICATION_ID = 1;
+    private Context context;
+
+    public static final NotifyingHandler instance = new NotifyingHandler();
+
+    public NotifyingHandler() {}
+    
+    @Override
+    public void onMessage(Context context, Bundle bundle) {
+        this.context = context;
+
+        String message = bundle.getString(UnifiedPushMessage.ALERT_KEY);
+
+        Log.d("APP: Notification", message);
+
+        notify(bundle);
+    }
+
+    private void notify(Bundle bundle) {
+        NotificationManager mNotificationManager = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        String message = bundle.getString(UnifiedPushMessage.ALERT_KEY);
+
+        Intent intent = new Intent(context, MainActivity.class)
+                .addFlags(PendingIntent.FLAG_UPDATE_CURRENT)
+                .putExtra(UnifiedPushMessage.ALERT_KEY, message);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
+                .setAutoCancel(true)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(context.getString(R.string.app_name))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setContentText(message);
+
+        mBuilder.setContentIntent(contentIntent);
+        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+    }
+
+}
+```
+
+- Update the `MainActivity` class to use the new message handler and register with the Unifiedpush Server. 
+- In the `onCreate()`, calling `setupPush()` registers with the Unifiedpush server.  The `setupPush()` function can handle what happens when the setup was successfully or if there was a failure. 
+- The `onResume()` and `onPause()` functions are insuring that the message handler is registered while the device is in these states. 
+- While the application is in the foreground the `onMessage()` function is called all the application to handle the push notification. In this example its a simple toast that is shown to the user. 
+- Finally the `toastStartUpPushNotification()` is an example that is called when the user launches the application. If the application is launched by the user clicking in the push notification, that notification gets toasted to the user.
+
+```java
+public class MainActivity extends AppCompatActivity implements MessageHandler {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        setupPush();
+        toastStartUpPushNotification();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        RegistrarManager.registerMainThreadHandler(this);
+        RegistrarManager.unregisterBackgroundThreadHandler(NotifyingHandler.instance);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        RegistrarManager.unregisterMainThreadHandler(this);
+        RegistrarManager.registerBackgroundThreadHandler(NotifyingHandler.instance);
+    }
+
+    @Override
+    public void onMessage(Context context, Bundle bundle) {
+        // display the message contained in the payload
+        Toast.makeText(getApplicationContext(),
+                bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
+
+    }
+    
+    private void setupPush(){
+        PushApplication application = (PushApplication) getApplication();
+        PushRegistrar pushRegistrar = application.getPushRegistrar();
+        pushRegistrar.register(getApplicationContext(), new Callback<Void>() {
+            
+            @Override
+            public void onSuccess(Void data) {
+                Log.d(TAG, "Registration Succeeded");
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+                Toast.makeText(getApplicationContext(),
+                        "Ops, something is wrong :(", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+    
+    public void toastStartUpPushNotification(){
+        if (getIntent() != null) {
+            Bundle bundle = getIntent().getExtras();
+            if (bundle != null && bundle.getString(UnifiedPushMessage.ALERT_KEY) != null) {
+                Toast.makeText(getApplicationContext(),
+                        bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
+            }
+
+        }
+    }
+
+}
+```
+
+More information can be found at [docs.aerogear.org][https://docs.aerogear.org/aerogear/latest/push-notifications.html].
+
+ 
 ### 4. Mobile-services parser
