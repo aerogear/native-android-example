@@ -3,9 +3,12 @@
 
 ## Introduction
 
-This is a sample Android Java application showing use of DataSync, [Keycloak](https://www.keycloak.org/about.html) and Unified Push using native upstream SDK's.
-Application is sending requests to [Ionic showcase server]([https://github.com/aerogear/ionic-showcase/tree/master/server](https://github.com/aerogear/ionic-showcase/tree/master/server)) which is a GraphQL server. For DataSync, application uses Apollo Client to query, mutate and subscribe. [AppAuth](https://github.com/openid/AppAuth-Android) to connect
- with Keycloak and Aerogear SDK for Unified Push support.
+This is a sample Android Java application showing use of DataSync, [Keycloak](https://www.keycloak.org/about.html) and Unified Push using native upstream SDK's. Application is sending requests to [Ionic showcase server]([https://github.com/aerogear/ionic-showcase/tree/master/server](https://github.com/aerogear/ionic-showcase/tree/master/server)) which is a GraphQL server. 
+
+- For DataSync, application uses Apollo Client to query, mutate and subscribe. 
+- For authorization we are using [AppAuth](https://github.com/openid/AppAuth-Android) to connect
+ with Keycloak. 
+- For Unifiedpush support we are using Aerogear SDK.
 
 ## Implementation
 ### 1. DataSync
@@ -13,7 +16,8 @@ Application is sending requests to [Ionic showcase server]([https://github.com/a
   To generate queries, mutations and subscriptions of running GraphQL server [Apollo Codegen]([https://github.com/apollographql/apollo-tooling](https://github.com/apollographql/apollo-tooling)) was used.
 
 #### Creating client
- - First, we need to build OkHttpClient to handle network requests
+ - First, we need to build OkHttpClient to handle network requests.
+`authHeader` is the actual token received from the token request during authorization flow. `authHeader` must contain `Bearer:` + token value:  `"Bearer: TOKEN"`
   ```java
 OkHttpClient okHttpClient = new OkHttpClient
         .Builder()
@@ -52,7 +56,7 @@ return ApolloClient.builder()
 Once client is build we can use it to run queries, mutations and subscriptions. On application start, a query, mutation or subscription is build
 #### Query
 ```java
-MyGeneratedQuery nameOfMyQuery = MyGeneratedQuery
+AllTasksQuery tasksQuery = AllTasksQuery
         .builder()
         .build();
   ```
@@ -74,7 +78,7 @@ DeleteTaskSubscription deleteTaskSubscription = DeleteTaskSubscription
    Next step is to use created client to initialize builded query, mutation or subscription and send request to the server
 #### Query
   ```java
-  client.query(nameOfMyQuery)
+  client.query(tasksQuery)
         .responseFetcher(onlineResponse)
         .enqueue(new ApolloCall.Callback<MyGeneratedQuery.Data>()
   ```
