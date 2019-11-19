@@ -8,12 +8,12 @@ import android.widget.EditText;
 import com.m.androidNativeApp.R;
 
 public class CreateTaskActivity extends Activity {
-    private ClientController clientController;
+    private TaskController taskController;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_task);
-        clientController = new ClientController(getApplicationContext());
+        taskController = new TaskController(getApplicationContext());
 
     }
 
@@ -22,8 +22,8 @@ public class CreateTaskActivity extends Activity {
         EditText taskDescription = findViewById(R.id.description_input);
         String title = taskTitle.getText().toString();
         String description = taskDescription.getText().toString();
-
-        clientController.createTask(title, description);
+        taskController.createTask(title, description);
+        finish();
     }
 
 }

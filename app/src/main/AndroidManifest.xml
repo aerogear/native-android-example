@@ -40,7 +40,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.m.services.dataSync.SyncActivity"
+            android:name="com.m.services.dataSync.TaskActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="com.m.androidNativeApp.SyncActivity"/>

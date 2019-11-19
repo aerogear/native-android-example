@@ -1,5 +1,7 @@
 package com.m.models;
 
+import com.m.services.dataSync.fragment.TaskFields;
+
 public class Item {
 
     private String title, description, id;
@@ -33,5 +35,13 @@ public class Item {
 
     public String getId() {
         return id;
+    }
+
+    public static Item createNewTaskToItems(TaskFields task) {
+        String taskTitle = task.title();
+        String taskDescription = task.description();
+        String taskId = task.id();
+        return new Item(taskTitle, taskDescription, taskId);
+
     }
 }

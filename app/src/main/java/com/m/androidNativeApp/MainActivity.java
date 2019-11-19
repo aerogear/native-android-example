@@ -21,7 +21,7 @@ import org.jboss.aerogear.android.unifiedpush.RegistrarManager;
 import org.jboss.aerogear.android.unifiedpush.fcm.UnifiedPushMessage;
 
 import com.m.services.dataSync.Client;
-import com.m.services.dataSync.SyncActivity;
+import com.m.services.dataSync.TaskActivity;
 
 
 import static com.m.services.Auth.LoginActivity.mAuthStateManager;
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
     }
 
     private void startSyncActivity(){
-        Intent intent = new Intent(this, SyncActivity.class);
+        Intent intent = new Intent(this, TaskActivity.class);
         startActivity(intent);
     }
 
