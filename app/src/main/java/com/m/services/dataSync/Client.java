@@ -1,4 +1,4 @@
-package com.m.dataSync;
+package com.m.services.dataSync;
 
 import android.content.Context;
 

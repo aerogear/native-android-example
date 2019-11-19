@@ -1,4 +1,4 @@
-package com.m.dataSync;
+package com.m.services.dataSync;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,11 +12,11 @@ import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.m.androidNativeApp.MainActivity;
 import com.m.androidNativeApp.R;
-import com.m.helper.LoginActivity;
+import com.m.services.Auth.LoginActivity;
 
 import org.jetbrains.annotations.NotNull;
 
-import static com.m.helper.LoginActivity.RE_AUTH;
+import static com.m.services.Auth.LoginActivity.RE_AUTH;
 
 
 public class CreateTask extends Activity {

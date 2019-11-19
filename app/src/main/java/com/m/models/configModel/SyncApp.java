@@ -1,6 +1,6 @@
-package com.m.helper.configModel;
+package com.m.models.configModel;
 
-import com.m.helper.configModel.config.SyncConfig;
+import com.m.models.configModel.config.SyncConfig;
 
 public class SyncApp extends Service {
     private String url;

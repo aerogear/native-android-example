@@ -8,12 +8,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.m.helper.configModel.Keycloak;
-import com.m.helper.configModel.MobileServiceJSON;
-import com.m.helper.configModel.Push;
-import com.m.helper.configModel.Service;
-import com.m.helper.configModel.SyncApp;
-import com.m.helper.configModel.config.AndroidConfig;
+import com.m.models.configModel.Keycloak;
+import com.m.models.MobileServiceJSON;
+import com.m.models.configModel.Push;
+import com.m.models.configModel.Service;
+import com.m.models.configModel.SyncApp;
+import com.m.models.configModel.config.AndroidConfig;
 
 
 import java.io.BufferedReader;

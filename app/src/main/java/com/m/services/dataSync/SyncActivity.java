@@ -1,4 +1,4 @@
-package com.m.dataSync;
+package com.m.services.dataSync;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,16 +20,16 @@ import com.apollographql.apollo.exception.ApolloException;
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
 import com.apollographql.apollo.fetcher.ResponseFetcher;
 import com.m.androidNativeApp.R;
-import com.m.helper.Item;
-import com.m.helper.LoginActivity;
-import com.m.dataSync.fragment.TaskFields;
+import com.m.models.Item;
+import com.m.services.Auth.LoginActivity;
+import com.m.services.dataSync.fragment.TaskFields;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.m.helper.LoginActivity.RE_AUTH;
+import static com.m.services.Auth.LoginActivity.RE_AUTH;
 
 
 public class SyncActivity extends AppCompatActivity {

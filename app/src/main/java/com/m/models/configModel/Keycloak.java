@@ -1,6 +1,6 @@
-package com.m.helper.configModel;
+package com.m.models.configModel;
 
-import com.m.helper.configModel.config.KeycloakConfig;
+import com.m.models.configModel.config.KeycloakConfig;
 
 public class Keycloak extends Service {
 

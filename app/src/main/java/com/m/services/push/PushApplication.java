@@ -1,4 +1,4 @@
-package com.m.push;
+package com.m.services.push;
 
 import android.app.Application;
 

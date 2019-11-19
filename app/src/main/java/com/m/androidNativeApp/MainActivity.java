@@ -9,8 +9,8 @@ import android.util.Log;
 
 import android.widget.Toast;
 
-import com.m.push.NotifyingHandler;
-import com.m.push.PushApplication;
+import com.m.services.push.NotifyingHandler;
+import com.m.services.push.PushApplication;
 
 
 
@@ -20,12 +20,12 @@ import org.jboss.aerogear.android.unifiedpush.PushRegistrar;
 import org.jboss.aerogear.android.unifiedpush.RegistrarManager;
 import org.jboss.aerogear.android.unifiedpush.fcm.UnifiedPushMessage;
 
-import com.m.dataSync.Client;
-import com.m.dataSync.SyncActivity;
+import com.m.services.dataSync.Client;
+import com.m.services.dataSync.SyncActivity;
 
 
-import static com.m.helper.LoginActivity.mAuthStateManager;
-import static com.m.helper.LoginActivity.mobileService;
+import static com.m.services.Auth.LoginActivity.mAuthStateManager;
+import static com.m.services.Auth.LoginActivity.mobileService;
 
 
 public class MainActivity extends AppCompatActivity implements MessageHandler {

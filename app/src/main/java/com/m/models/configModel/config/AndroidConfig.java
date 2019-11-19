@@ -1,4 +1,4 @@
-package com.m.helper.configModel.config;
+package com.m.models.configModel.config;
 
 public class AndroidConfig {
     private String variantId;

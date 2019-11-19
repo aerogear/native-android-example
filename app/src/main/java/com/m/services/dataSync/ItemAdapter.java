@@ -1,4 +1,4 @@
-package com.m.dataSync;
+package com.m.services.dataSync;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.m.androidNativeApp.R;
-import com.m.helper.Item;
+import com.m.models.Item;
 
 import java.util.List;
 
