@@ -49,6 +49,22 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_AUTH) {
+            AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
+            AuthorizationException ex = AuthorizationException.fromIntent(data);
+
+            mAuthStateManager.updateAfterAuthorization(resp, ex);
+            mAuthState = new AuthState(resp, ex);
+            exchangeAuthorizationCode(resp);
+
+        } else {
+            System.out.println("Error, wrong response code");
+        }
+    }
+
     public void doAuth() {
         mAuthService = new AuthorizationService(this);
         final AuthorizationServiceConfiguration.RetrieveConfigurationCallback retrieveCallback =
@@ -77,21 +93,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_AUTH) {
-            AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
-            AuthorizationException ex = AuthorizationException.fromIntent(data);
 
-            mAuthStateManager.updateAfterAuthorization(resp, ex);
-            mAuthState = new AuthState(resp, ex);
-            exchangeAuthorizationCode(resp);
-
-        } else {
-            System.out.println("Error, wrong response code");
-        }
-    }
 
     private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse) {
         performTokenRequest(authorizationResponse.createTokenExchangeRequest());

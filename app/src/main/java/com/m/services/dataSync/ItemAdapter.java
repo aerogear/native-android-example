@@ -14,11 +14,11 @@ import com.m.models.Item;
 import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemViewHolder> {
-    Context mCtx;
+    Context context;
     private List<Item> itemList;
 
-    ItemAdapter(Context mCtx, List<Item> itemList) {
-        this.mCtx = mCtx;
+    ItemAdapter(Context context, List<Item> itemList) {
+        this.context = context;
         this.itemList = itemList;
     }
 
@@ -26,11 +26,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemViewHolder> {
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        LayoutInflater inflater = LayoutInflater.from(mCtx);
+        LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.list_layout, null);
-        ItemViewHolder holder = new ItemViewHolder(view);
 
-        return holder;
+        return new ItemViewHolder(view);
     }
 
     @Override

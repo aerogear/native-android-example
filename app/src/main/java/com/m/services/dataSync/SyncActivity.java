@@ -21,15 +21,13 @@ import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
 import com.apollographql.apollo.fetcher.ResponseFetcher;
 import com.m.androidNativeApp.R;
 import com.m.models.Item;
-import com.m.services.Auth.LoginActivity;
+import com.m.services.Auth.AuthController;
 import com.m.services.dataSync.fragment.TaskFields;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.m.services.Auth.LoginActivity.RE_AUTH;
 
 
 public class SyncActivity extends AppCompatActivity {
@@ -38,12 +36,14 @@ public class SyncActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
     public List<Item> itemList;
+    private AuthController authController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         client = Client.getInstance();
+        authController = new AuthController(getApplicationContext());
 
         itemAdapter = getAdapter();
         recyclerView.setAdapter(itemAdapter);
@@ -218,14 +218,8 @@ public class SyncActivity extends AppCompatActivity {
 
     private void reAuthoriseOn403WithApollo(ApolloException e){
         if (e.getMessage().equals("HTTP 403 Forbidden")) {
-            reAuthorise();
+            authController.reAuthorise();
         }
-    }
-
-    public void reAuthorise() {
-        RE_AUTH = 403;
-        Intent redirectToRefreshToken = new Intent(SyncActivity.this, LoginActivity.class);
-        startActivity(redirectToRefreshToken);
     }
 
 
@@ -249,7 +243,7 @@ public class SyncActivity extends AppCompatActivity {
     }
 
     public void addTaskActivity(View view) {
-        Intent launchActivity1 = new Intent(this, CreateTask.class);
+        Intent launchActivity1 = new Intent(this, CreateTaskActivity.class);
         startActivity(launchActivity1);
     }
 
