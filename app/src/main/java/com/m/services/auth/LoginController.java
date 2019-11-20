@@ -1,72 +1,54 @@
-package com.m.services.Auth;
-
+package com.m.services.auth;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.m.androidNativeApp.MainActivity;
 import com.m.helper.MobileService;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
-import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.ResponseTypeValues;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 
-public class LoginActivity extends AppCompatActivity {
+import static com.m.services.auth.LoginActivity.RE_AUTH;
+import static com.m.services.auth.LoginActivity.mAuthStateManager;
 
-    public static AuthState mAuthState;
-    public static AuthStateManager mAuthStateManager;
-    public static MobileService mobileService;
+public class LoginController {
+    private Context context;
+    private MobileService mobileService;
     private AuthorizationService mAuthService;
-    private int RC_AUTH = 100;
-    public static int RE_AUTH = 0;
+    private LoginListener listener;
+    public static AuthState mAuthState;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mAuthStateManager = AuthStateManager.getInstance(this);
-        Context context = getApplicationContext();
-        mobileService = MobileService.getInstance(context.getApplicationContext());
 
-        if (mAuthStateManager.getCurrent().isAuthorized() && RE_AUTH == 0) {
-            System.out.println("User is authorized already");
-            startActivity(new Intent(this, MainActivity.class));
+    public LoginController(Context context){
+        this.context = context;
+        mobileService = MobileService.getInstance();
 
-            finish();
-
-        } else {
-            doAuth();
-        }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_AUTH) {
-            AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
-            AuthorizationException ex = AuthorizationException.fromIntent(data);
+    public LoginController(Context context, LoginListener listener, MobileService mobileService){
+        this.context = context;
+        this.listener = listener;
+        this.mobileService = mobileService;
+    }
 
-            mAuthStateManager.updateAfterAuthorization(resp, ex);
-            mAuthState = new AuthState(resp, ex);
-            exchangeAuthorizationCode(resp);
-
-        } else {
-            System.out.println("Error, wrong response code");
-        }
+    public void reAuthorise() {
+        RE_AUTH = 403;
+        Intent redirectToRefreshToken = new Intent(context, LoginActivity.class);
+        context.startActivity(redirectToRefreshToken);
     }
 
     public void doAuth() {
-        mAuthService = new AuthorizationService(this);
+        mAuthService = new AuthorizationService(context);
         final AuthorizationServiceConfiguration.RetrieveConfigurationCallback retrieveCallback =
                 (authorizationServiceConfiguration, e) -> {
                     if (e != null) {
@@ -89,11 +71,17 @@ public class LoginActivity extends AppCompatActivity {
                 Uri.parse(k_REDIRECT_URI));
         AuthorizationRequest authRequest = authorizationRequest.build();
         Intent authIntent = mAuthService.getAuthorizationRequestIntent(authRequest);
-        startActivityForResult(authIntent, RC_AUTH);
-
+        listener.reAuth(authIntent);
     }
 
+    public void handleAuthLoginResponse(Intent data){
+        AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
+        AuthorizationException ex = AuthorizationException.fromIntent(data);
 
+        mAuthStateManager.updateAfterAuthorization(resp, ex);
+        mAuthState = new AuthState(resp, ex);
+        exchangeAuthorizationCode(resp);
+    }
 
     private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse) {
         performTokenRequest(authorizationResponse.createTokenExchangeRequest());
@@ -113,7 +101,6 @@ public class LoginActivity extends AppCompatActivity {
             @Nullable AuthorizationException authException) {
         mAuthState.update(tokenResponse, authException);
 
-        System.out.println("Token expires in : " + mAuthState.getAccessTokenExpirationTime());
-        startActivity(new Intent(this, MainActivity.class));
+        listener.authComplete();
     }
 }

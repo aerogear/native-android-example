@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.apollographql.apollo.ApolloClient;
 import com.m.androidNativeApp.R;
 import com.m.models.Item;
 
@@ -19,8 +18,6 @@ import java.util.List;
 
 
 public class TaskActivity extends AppCompatActivity {
-    public static ApolloClient client;
-    private RecyclerView recyclerView;
     private ItemAdapter itemAdapter;
     public List<Item> itemList = new ArrayList<>();
     private TaskController taskController;
@@ -30,9 +27,7 @@ public class TaskActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        client = Client.getInstance();
-        itemAdapter = getAdapter();
-        recyclerView.setAdapter(itemAdapter);
+        configRecyclerViewWithItemAdapter();
 
         TaskListener listener = new TaskListener();
         listener.setListener(new TaskListener.TaskListenerCallback() {
@@ -69,11 +64,11 @@ public class TaskActivity extends AppCompatActivity {
         taskController.deleteTask(buttonId);
     }
 
-    public ItemAdapter getAdapter() {
-        recyclerView = findViewById(R.id.recyclerView);
+    public void configRecyclerViewWithItemAdapter() {
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        return new ItemAdapter(this, itemList);
-
+        itemAdapter = new ItemAdapter(this, itemList);
+        recyclerView.setAdapter(itemAdapter);
     }
 
     public void addTaskActivity(View view) {

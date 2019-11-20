@@ -24,8 +24,8 @@ import com.m.services.dataSync.Client;
 import com.m.services.dataSync.TaskActivity;
 
 
-import static com.m.services.Auth.LoginActivity.mAuthStateManager;
-import static com.m.services.Auth.LoginActivity.mobileService;
+import static com.m.services.auth.LoginActivity.mAuthStateManager;
+import static com.m.services.auth.LoginActivity.mobileService;
 
 
 public class MainActivity extends AppCompatActivity implements MessageHandler {

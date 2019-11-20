@@ -12,7 +12,7 @@ import com.apollographql.apollo.exception.ApolloException;
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
 import com.apollographql.apollo.fetcher.ResponseFetcher;
 import com.m.models.Item;
-import com.m.services.Auth.AuthController;
+import com.m.services.auth.LoginController;
 import com.m.services.dataSync.fragment.TaskFields;
 
 import org.jetbrains.annotations.NotNull;
@@ -21,14 +21,14 @@ import java.util.ArrayList;
 
 public class TaskController {
     private ApolloClient client;
-    private AuthController authController;
+    private LoginController loginController;
     private Context context;
     private TaskListener listener;
 
 
     public TaskController(Context context){
         client = Client.getInstance();
-        authController = new AuthController(context);
+        loginController = new LoginController(context);
         this.context = context;
     }
 
@@ -203,7 +203,7 @@ public class TaskController {
 
     private void reAuthoriseOn403WithApollo(ApolloException e){
         if (e.getMessage().equals("HTTP 403 Forbidden")) {
-            authController.reAuthorise();
+            loginController.reAuthorise();
         }
     }
 }

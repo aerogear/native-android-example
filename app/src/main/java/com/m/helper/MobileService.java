@@ -35,15 +35,15 @@ public class MobileService implements IMobileService {
 
     private final String FILE_LOCATION = "config/mobile-services.json";
 
-    private MobileService(Context context) {
+    public void init(Context context){
         System.out.println("APP : Setting up Mobile Services");
         assetManager = context.getAssets();
         readMobileServiceJSON();
     }
 
-    public static MobileService getInstance(Context context) {
+    public static MobileService getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new MobileService(context);
+            INSTANCE = new MobileService();
         }
         return INSTANCE;
     }
