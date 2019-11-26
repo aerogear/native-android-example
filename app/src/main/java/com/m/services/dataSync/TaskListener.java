@@ -10,6 +10,7 @@ public class TaskListener {
         public void addAllTasks(ArrayList<Item> items);
         public void deleteTask(String taskId);
         public void addTask(Item task);
+        public void onFailure(String errorMessage);
     }
 
     private TaskListenerCallback listener;
@@ -32,6 +33,10 @@ public class TaskListener {
 
     public void addTask(Item task){
         listener.addTask(task);
+    }
+
+    public void onFailure(String errorMessage) {
+        listener.onFailure(errorMessage);
     }
 
 }

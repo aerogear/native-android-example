@@ -99,8 +99,12 @@ public class LoginController {
     private void receivedTokenResponse(
             @Nullable TokenResponse tokenResponse,
             @Nullable AuthorizationException authException) {
-        mAuthState.update(tokenResponse, authException);
-
-        listener.authComplete();
+            mAuthState.update(tokenResponse, authException);
+        if (authException == null) {
+            listener.authComplete();
+        } else {
+            System.out.println(authException.errorDescription);
+            reAuthorise();
+        }
     }
 }

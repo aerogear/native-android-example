@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.m.androidNativeApp.R;
 import com.m.models.Item;
-
+import com.m.services.auth.LoginController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class TaskActivity extends AppCompatActivity {
     private ItemAdapter itemAdapter;
     public List<Item> itemList = new ArrayList<>();
     private TaskController taskController;
+    private LoginController loginController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,8 @@ public class TaskActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         configRecyclerViewWithItemAdapter();
+
+        loginController = new LoginController(this);
 
         TaskListener listener = new TaskListener();
         listener.setListener(new TaskListener.TaskListenerCallback() {
@@ -47,6 +51,15 @@ public class TaskActivity extends AppCompatActivity {
             public void addTask(Item task) {
                 itemList.add(task);
                 updateUi();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                if (errorMessage.equals("HTTP 403 Forbidden")) {
+                    loginController.reAuthorise();
+                } else {
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show());
+                }
             }
         });
 

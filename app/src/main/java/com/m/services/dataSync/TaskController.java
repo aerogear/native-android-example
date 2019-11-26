@@ -12,7 +12,6 @@ import com.apollographql.apollo.exception.ApolloException;
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
 import com.apollographql.apollo.fetcher.ResponseFetcher;
 import com.m.models.Item;
-import com.m.services.auth.LoginController;
 import com.m.services.dataSync.fragment.TaskFields;
 
 import org.jetbrains.annotations.NotNull;
@@ -21,14 +20,12 @@ import java.util.ArrayList;
 
 public class TaskController {
     private ApolloClient client;
-    private LoginController loginController;
     private Context context;
     private TaskListener listener;
 
 
     public TaskController(Context context){
         client = Client.getInstance();
-        loginController = new LoginController(context);
         this.context = context;
     }
 
@@ -65,7 +62,7 @@ public class TaskController {
 
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
-                        reAuthoriseOn403WithApollo(e);
+                        listener.onFailure(e.getMessage());
                     }
                 });
     }
@@ -88,7 +85,7 @@ public class TaskController {
 
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
-                        reAuthoriseOn403WithApollo(e);
+                        listener.onFailure(e.getMessage());
                     }
 
                     @Override
@@ -124,7 +121,7 @@ public class TaskController {
 
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
-                        reAuthoriseOn403WithApollo(e);
+                        listener.onFailure(e.getMessage());
                     }
 
                     @Override
@@ -165,7 +162,7 @@ public class TaskController {
 
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
-                        reAuthoriseOn403WithApollo(e);
+                        listener.onFailure(e.getMessage());
                     }
                 });
     }
@@ -185,7 +182,7 @@ public class TaskController {
 
             @Override
             public void onFailure(@NotNull ApolloException e) {
-                reAuthoriseOn403WithApollo(e);
+                listener.onFailure(e.getMessage());
             }
         });
     }
@@ -198,12 +195,5 @@ public class TaskController {
         }
 
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
-    }
-
-
-    private void reAuthoriseOn403WithApollo(ApolloException e){
-        if (e.getMessage().equals("HTTP 403 Forbidden")) {
-            loginController.reAuthorise();
-        }
     }
 }
