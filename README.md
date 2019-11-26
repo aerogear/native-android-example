@@ -190,25 +190,25 @@ private void receivedTokenResponse(
 ```
 ### 3. Unifiedpush implementation
 #### External Setup
-For setting up push notifications a [firebase][https://firebase.google.com/] account is required. The following information below is required and can be found the firebase project settings.
+For setting up push notifications a [firebase](https://firebase.google.com/) account is required. The following information below is required and can be found the firebase project settings.
 
 - The `google-services.json` file.
 - Sender ID 
 - Server Key
 
-With in the [Aerogear Unifiefpush Server][https://github.com/aerogear/aerogear-unifiedpush-server] create you application. For creating the application you will need the following information.
+With in the [Aerogear Unifiefpush Server](https://github.com/aerogear/aerogear-unifiedpush-server) create you application. For creating the application you will need the following information.
 
 - Sender ID - This is gotten from firebase
 - Server Key - this is gotten from firebase
 
-Once the application variant has been set up the follow information is need to add to the `push-config.json` file.
+Once the application variant has been set up, the following information is need to add to the `push-config.json` file.
 
 - Server URL
 - Variant ID
 - Variant Secret
 - Sender ID (This is the same sender ID as gotten from firebase)
 
-Located in `app/src/main/assets` folder is a sample of the `push-config.json` file which has the following format. This file is auto located by the [aerogear-android-push][https://github.com/aerogear/aerogear-android-push] package *(this can be configured)*.
+Located in `app/src/main/assets` folder is a sample of the `push-config.json` file which has the following format. This file is auto located by the [aerogear-android-push](https://github.com/aerogear/aerogear-android-push) package.
 
 ```json
 
@@ -223,7 +223,7 @@ Located in `app/src/main/assets` folder is a sample of the `push-config.json` fi
 ```
 
 #### Project Setup
-- Include the [aerogear-android-push][https://github.com/aerogear/aerogear-android-push] package in `build.gradle`.  
+- Include the [aerogear-android-push](https://github.com/aerogear/aerogear-android-push) package in `build.gradle`.  
 
 ```
 dependencies {
@@ -232,7 +232,7 @@ dependencies {
     ...
 }
 ```
-- Edit the `AndroidManifest.xml` to allow permissions for the push notifications and change which class the application is launched from.
+- Edit the `AndroidManifest.xml` to allow permissions for the push notifications.
 
 ```xml
 <manifest>
@@ -246,7 +246,7 @@ dependencies {
 </manifest>
 ```
 
-- Create the new application launcher class. In this class the a ups registrar is setup. 
+- Create the new application launcher class. In this class the ups registrar is setup. 
 - The `onCreate` function consumes the `push-config.json` file.
 
 ```java
@@ -281,8 +281,8 @@ public class PushApplication extends Application {
 ```
 
 - The next step would be to configure the notification handler. This class will implement the MessageHandler interface. 
-- The method to look at here is `onMessage()` which handles what happens when the device receives a message. This function is called both times, when the application is in the Foreground and in the Background. 
-- `notify()` sets up how the message should be displayed in the top notification area. The activity that is opened when the user clicks on the notifications is configured here. Other information such as title and icon can also be set at this time. 
+- `onMessage()` method handles what happens when the device receives a message. This function is called when the application is in the foreground and in the background. 
+- `notify()` sets up how the message should be displayed in the top notification area. The activity that is opened when the user clicks on the notifications is configured here as well. Other information such as title and icon can also be set at this time. 
 
 ```java 
 package com.m.push;
@@ -336,9 +336,9 @@ public class NotifyingHandler implements MessageHandler {
 ```
 
 - Update the `MainActivity` class to use the new message handler and register with the Unifiedpush Server. 
-- In the `onCreate()`, calling `setupPush()` registers with the Unifiedpush server.  The `setupPush()` function can handle what happens when the setup was successfully or if there was a failure. 
-- The `onResume()` and `onPause()` functions are insuring that the message handler is registered while the device is in these states. 
-- While the application is in the foreground the `onMessage()` function is called all the application to handle the push notification. In this example its a simple toast that is shown to the user. 
+- In the `onCreate()`, calling `setupPush()` registers with the Unifiedpush server.  The `setupPush()` function controls what happens when the setup was successful or unsuccessful. 
+- The `onResume()` and `onPause()` functions are ensuring that the message handler is registered while the device is in these states. 
+- While the application is in the foreground the `onMessage()` function is called to handle the push notification. In this example its a simple toast that is shown to the user. 
 - Finally the `toastStartUpPushNotification()` is an example that is called when the user launches the application. If the application is launched by the user clicking in the push notification, that notification gets toasted to the user.
 
 ```java
@@ -405,40 +405,37 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
 }
 ```
-
 More information can be found at [docs.aerogear.org][https://docs.aerogear.org/aerogear/latest/push-notifications.html].
 
- 
 ### 4. Mobile-services parser
-The Mobile services parser is a helper class to parser the `mobile-services.json` file. 
-This file contains the connection details for the services used with in the application.
+The Mobile services parser is a helper class to parse the `mobile-services.json` file. 
+This file contains the connection details for the services used within the application.
 
-There is an interface *(IMobileService)* which has method stubs for configuration getters required to to configure *Apollo-Client*, *App-Auth* and  *Unified push*. 
+`IMobileService` has method stubs for configuration getters required to configure the `Apollo-Client`, `App-Auth` and `Unified push`. 
 These methods are:
 
-- `String getGraphqlServer()` = Return the URL for a graphQL server.
-- `String getKIssuer()` = Returns the Issuer URL for app auth.
-- `String getKClientId()` = Returns the client Id for app auth 
-- `String getPushUrl()` = Returns the URL for the unified push server. *(unused in this example)*
-- `String getPushVariantId()` = Returns the Variant ID for the unified push server. *(unused in this example)*
-- `String getPushVariantSecret()` = Returns the Variant Secret for the unified push server. *(unused in this example)*
+- `String getGraphqlServer()` = Return the URL for a GraphQL server.
+- `String getKIssuer()` = Returns the Issuer URL for AppAuth.
+- `String getKClientId()` = Returns the client Id for AppAuth 
+- `String getPushUrl()` = Returns the URL for the unified push server.
+- `String getPushVariantId()` = Returns the Variant ID for the unified push server.
+- `String getPushVariantSecret()` = Returns the Variant Secret for the unified push server.
  
 #### mobile-services.json
  
-For this example the `mobile-services.json` is saved in `app/src/main/assets/config`.
+In our example, `mobile-services.json` is saved in `app/src/main/assets/config`.
 There are three types of services in the services list. 
-Each of these have the configuration for the different type services.
-The different types of services are:
+Each of these have the configuration for the different type services which are:
 
 - **sync-app** 
 - **keycloak**
 - **push** 
 
 ##### sync-app
-Sync-app holds the configuration for connecting to a graphQL server.
-The JSON object in the services list at minimum needs the fields in the example below.
+Sync-app holds the configuration for connecting to a GraphQL server.
+The JSON object in the services list, at minimum, needs the fields in the example below.
 
-Some graphQL servers require a web socket URL which is placed in the `config` object.
+Some GraphQL servers require a web socket URL which is placed in the `config` object.
 When this object is converted into a java object, it takes the form of `SyncApp.class`
 
 ```json
@@ -451,12 +448,10 @@ When this object is converted into a java object, it takes the form of `SyncApp.
     "url": "https://server.example.com/graphql"
   }
 ```
-
 ##### Keycloak
 
-The JSON object example below holds the configuration for a keycloak server which would be in the services array.
-When the `mobile-service.json` file is parsed this configuration build is converted to a java `Keycloak.class` object.
-
+The JSON object example below holds the configuration for Keycloak server which would be in the services array.
+When the `mobile-service.json` file is parsed, configuration build is converted to a java `Keycloak.class` object.
 
 ```json
     {
@@ -473,11 +468,9 @@ When the `mobile-service.json` file is parsed this configuration build is conver
       "url": "https://sso.example.com/auth"
     }
 ```
-
 ##### Push
 
-The Push example configuration is not used but this would be its format.
-The only information that is missing from this `sender Id` which can be found in application settings on firebase or in the `google-services.json` file, which is required in this example application.
+The Push example configuration is not used in our example, but the following would be its format.
 
 ```json
     {
@@ -492,6 +485,7 @@ The only information that is missing from this `sender Id` which can be found in
       "url": "https://push.example.com"
     }
 ```
+The only information that is missing is `sender Id`, which can be found in application settings on firebase, or in the `google-services.json` file, which is required in this example application.
 
 #### MobileService.class
 
@@ -506,15 +500,11 @@ dependencies {
 }
 ```
 For more information on `Gson` please visit [github.com/google.gson][https://github.com/google/gson].
-It is worth understanding how this package is used to parse the `mobile-services.json` file.
-
-This class uses the singleton pattern, meaning only one instance will ever be created.
 To get an instances of the class call `MobileService.getInstance(<Application context>)`. 
-*Application Context* is required for reading files from disc.
+`Application Context` is required for reading files from disc.
 On the initial call the `mobile-services.json` file is read and parsed.
 
-The first instance where this class is been used is in the `AppAuthActivity`.
-In varies methods with this activity the object `mobileService` is accessed.
+The first instance where this class is used is in the `AppAuthActivity`.
 
 ```java
 public class AppAuthActivity extends AppCompatActivity {
@@ -531,17 +521,11 @@ public class AppAuthActivity extends AppCompatActivity {
     }
 }
 ```
-
-The next place that `mobileService` is accessed is the `MainActivity`. 
-Here it is import directly from the `AppAuthActivity`, this would not be necessary.
-As `MobileService.class` could have been imported directly.
-How ever the object is imported, the use case and a data will remain the same.
-Here the `mobileservice` is used in the configuration of the graphQL client.
+The next place that `mobileService` is accessed is the `MainActivity` to configure client.
 
 ```java
 ...
 import static com.m.services.appAuth.AppAuthActivity.mobileService;
-
 
 public class MainActivity extends AppCompatActivity implements MessageHandler {
 
