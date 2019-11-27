@@ -3,7 +3,7 @@
 
 ## Introduction
 
-This is a sample Android Java application showing use of DataSync, [Keycloak](https://www.keycloak.org/about.html) and Unified Push using native upstream SDK's. Application is sending requests to [Ionic showcase server]([https://github.com/aerogear/ionic-showcase/tree/master/server](https://github.com/aerogear/ionic-showcase/tree/master/server)) which is a GraphQL server. 
+This is a sample Android Java application showing use of DataSync, [Keycloak](https://www.keycloak.org/about.html) and Unified Push using native upstream SDK's. Application is sending requests to [Ionic showcase server](https://github.com/aerogear/ionic-showcase/tree/master/server) which is a GraphQL server. 
 
 - For DataSync, application uses Apollo Client to query, mutate and subscribe. 
 - For authorization we are using [AppAuth](https://github.com/openid/AppAuth-Android) to connect
@@ -13,11 +13,11 @@ This is a sample Android Java application showing use of DataSync, [Keycloak](ht
 ## Implementation
 ### 1. DataSync
 #### Generating queries, mutations and subscriptions
-  To generate queries, mutations and subscriptions of running GraphQL server [Apollo Codegen]([https://github.com/apollographql/apollo-tooling](https://github.com/apollographql/apollo-tooling)) was used.
+  To generate queries, mutations and subscriptions of running GraphQL server [Apollo Codegen](https://github.com/apollographql/apollo-tooling) was used.
 
 #### Creating client
  - First, we need to build OkHttpClient to handle network requests.
-`authHeader` is the actual token received from the token request during authorization flow. `authHeader` must contain `Bearer:` + token value:  `"Bearer: TOKEN"`
+`authHeader` is the actual token received from the token request during authorization flow. `authHeader` must contain `Bearer:` + token value:  `"Bearer: <TOKEN>"`
 
   ```java
 OkHttpClient okHttpClient = new OkHttpClient
@@ -31,6 +31,7 @@ OkHttpClient okHttpClient = new OkHttpClient
         .build();
 ```
  - Then, NormalizedCacheFactory to provide caching mechanism
+ 
  ```java
  ApolloSqlHelper apolloSqlHelper = new ApolloSqlHelper(context, DB_CACHE_NAME);
 
@@ -38,11 +39,13 @@ NormalizedCacheFactory<LruNormalizedCache> cacheFactory = new LruNormalizedCache
         .chain(new SqlNormalizedCacheFactory(apolloSqlHelper));
  ```
  - Passing in connection params for subscriptions to work if server is behind authentication mechanism
+ 
  ```java
  Map<String, Object> connectionParams = new HashMap<>();
 connectionParams.put("Authorization", authHeader);
 ```
 - And build our Apollo Client
+
 ```java
 return ApolloClient.builder()
         .enableAutoPersistedQueries(true)
@@ -53,17 +56,20 @@ return ApolloClient.builder()
         .okHttpClient(okHttpClient)
         .build();
 ```
+
 #### Using queries, mutation and subscriptions
-Once client is build we can use it to run queries, mutations and subscriptions. On application start, a query, mutation or subscription is build
+Once client is build we can use it to run queries, mutations and subscriptions. On application start, a query, mutation or subscription are build
 #### Query
+
 ```java
 AllTasksQuery tasksQuery = AllTasksQuery
         .builder()
         .build();
   ```
-  #### Mutation
+#### Mutation
+
  ```java
- DeleteTaskMutation deleteTask = DeleteTaskMutation
+DeleteTaskMutation deleteTask = DeleteTaskMutation
         .builder()
         .id(Param that is passed in to identify item to remove)
         .build();
@@ -76,7 +82,7 @@ DeleteTaskSubscription deleteTaskSubscription = DeleteTaskSubscription
         .build();
    ```
 
-   Next step is to use created client to initialize builded query, mutation or subscription and send request to the server
+   Next, use created client to initialize built query, mutation, or subscription and send request to the server.
 #### Query
   ```java
   client.query(tasksQuery)
@@ -111,9 +117,11 @@ public void onFailure(@NotNull ApolloException e) {
 }
 ```
 ### 2. Keycloak implementation
-To implement Keycloak with our app we have used [AppAuth]([https://github.com/openid/AppAuth-Android](https://github.com/openid/AppAuth-Android)). You will need a keycloak instance running either on OpenShift or you can setup locally on Ionic Showcase server that has been used in our example app
+To implement Keycloak with our app we have used [AppAuth](https://github.com/openid/AppAuth-Android). 
+You will need a keycloak instance running either on OpenShift or you can setup locally on Ionic Showcase server that has been used in our example app.
 
 - First step is to fetch well knows configuration for Keycloak
+
 ```java
 mAuthService = new AuthorizationService(this);
 final AuthorizationServiceConfiguration.RetrieveConfigurationCallback retrieveCallback =
@@ -129,6 +137,7 @@ String discoveryEndpoint = mobileService.getKIssuer() + ".well-known/openid-conf
 AuthorizationServiceConfiguration.fetchFromUrl(Uri.parse(discoveryEndpoint), retrieveCallback);
 ```
 - Once we have received configuration from Keycloak we can build Authorization Request
+
 ```java
 String k_REDIRECT_URI = "com.m.androidnativeapp:/oauth2redirect";
 
@@ -143,8 +152,9 @@ AuthorizationRequest authRequest = authorizationRequest.build();
 Intent authIntent = mAuthService.getAuthorizationRequestIntent(authRequest);
 startActivityForResult(authIntent, RC_AUTH);
 ```
-- It is important to note that we need to provide valid `redirect_URI` and `clientId`, in our sample app we are using `mobile-services.json` file that has been generated in [MDC]([https://access.redhat.com/documentation/en-us/red_hat_mobile_developer_services/1/pdf/getting_started/Red_Hat_Mobile_Developer_Services-1-Getting_Started-en-US.pdf](https://access.redhat.com/documentation/en-us/red_hat_mobile_developer_services/1/pdf/getting_started/Red_Hat_Mobile_Developer_Services-1-Getting_Started-en-US.pdf)). Once authorization request has been send app is redirected to Keycloak log in screen.
+- It is important to note that we need to provide valid `redirect_URI` and `clientId`, in our sample app we are using `mobile-services.json` file that has been generated in [MDC](https://access.redhat.com/documentation/en-us/red_hat_mobile_developer_services/1/pdf/getting_started/Red_Hat_Mobile_Developer_Services-1-Getting_Started-en-US.pdf). Once authorization request has been send app is redirected to Keycloak log in screen.
 - After logging in with valid credentials and providing valid `redirect_URI` user is pushed back to the application and can retrieve response and can update state in auth state manager if wish to do so.
+
 ```java
 @Override
 protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -163,6 +173,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 }
 ```
 - With the response back we can trigger `exchangeAuthorizationCode` and perform token request
+
 ```java
 private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse) {
     performTokenRequest(authorizationResponse.createTokenExchangeRequest());
@@ -177,6 +188,7 @@ private void performTokenRequest(TokenRequest request) {
 }
 ```
 - Once we get a response we can view our token details
+
 ```java
 private void receivedTokenResponse(
         @Nullable TokenResponse tokenResponse,
@@ -405,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
 
 }
 ```
-More information can be found at [docs.aerogear.org][https://docs.aerogear.org/aerogear/latest/push-notifications.html].
+More information can be found at [docs.aerogear.org](https://docs.aerogear.org/aerogear/latest/push-notifications.html).
 
 ### 4. Mobile-services parser
 The Mobile services parser is a helper class to parse the `mobile-services.json` file. 
@@ -499,7 +511,7 @@ dependencies {
     ...
 }
 ```
-For more information on `Gson` please visit [github.com/google.gson][https://github.com/google/gson].
+For more information on `Gson` please visit [github.com/google.gson](https://github.com/google/gson).
 To get an instances of the class call `MobileService.getInstance(<Application context>)`. 
 `Application Context` is required for reading files from disc.
 On the initial call the `mobile-services.json` file is read and parsed.
