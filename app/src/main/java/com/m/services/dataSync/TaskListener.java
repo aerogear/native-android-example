@@ -1,5 +1,6 @@
 package com.m.services.dataSync;
 
+import com.apollographql.apollo.exception.ApolloException;
 import com.m.models.Item;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ public class TaskListener {
         public void addAllTasks(ArrayList<Item> items);
         public void deleteTask(String taskId);
         public void addTask(Item task);
-        public void onFailure(String errorMessage);
+        public void onFailure(ApolloException error);
     }
 
     private TaskListenerCallback listener;
@@ -35,8 +36,8 @@ public class TaskListener {
         listener.addTask(task);
     }
 
-    public void onFailure(String errorMessage) {
-        listener.onFailure(errorMessage);
+    public void onFailure(ApolloException error) {
+        listener.onFailure(error);
     }
 
 }

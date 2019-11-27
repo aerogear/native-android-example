@@ -10,6 +10,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.apollographql.apollo.exception.ApolloException;
+import com.apollographql.apollo.exception.ApolloHttpException;
+import com.apollographql.apollo.exception.ApolloNetworkException;
 import com.m.androidNativeApp.R;
 import com.m.models.Item;
 import com.m.services.auth.LoginController;
@@ -54,12 +57,8 @@ public class TaskActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(String errorMessage) {
-                if (errorMessage.equals("HTTP 403 Forbidden")) {
-                    loginController.reAuthorise();
-                } else {
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show());
-                }
+            public void onFailure(ApolloException error) {
+                handleErrorExceptions(error);
             }
         });
 
@@ -104,6 +103,35 @@ public class TaskActivity extends AppCompatActivity {
 
     private void updateUi(){
         runOnUiThread(() -> itemAdapter.notifyDataSetChanged());
+    }
+
+    private void uiToast(String message) {
+        runOnUiThread(() -> Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show());
+
+    }
+
+    private void handleErrorExceptions(ApolloException error){
+        if (error instanceof ApolloHttpException){
+            handleHttpErrors((ApolloHttpException) error);
+        } else if (error instanceof ApolloNetworkException){
+            uiToast(error.getMessage());
+        } else {
+            uiToast(error.getMessage());
+        }
+    }
+
+    private void handleHttpErrors(ApolloHttpException error){
+      switch (error.code()){
+          case 401:
+          case 403:
+              loginController.reAuthorise();
+              break;
+          case 503:
+              uiToast("Service Unavailable");
+          default:
+              uiToast(error.getMessage());
+
+      }
     }
 
 }

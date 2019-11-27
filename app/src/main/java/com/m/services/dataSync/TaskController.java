@@ -62,7 +62,7 @@ public class TaskController {
 
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
-                        listener.onFailure(e.getMessage());
+                        listener.onFailure(e);
                     }
                 });
     }
@@ -85,7 +85,7 @@ public class TaskController {
 
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
-                        listener.onFailure(e.getMessage());
+                        listener.onFailure(e);
                     }
 
                     @Override
@@ -121,7 +121,7 @@ public class TaskController {
 
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
-                        listener.onFailure(e.getMessage());
+                        listener.onFailure(e);
                     }
 
                     @Override
@@ -162,7 +162,7 @@ public class TaskController {
 
                     @Override
                     public void onFailure(@NotNull ApolloException e) {
-                        listener.onFailure(e.getMessage());
+                        listener.onFailure(e);
                     }
                 });
     }
@@ -182,7 +182,7 @@ public class TaskController {
 
             @Override
             public void onFailure(@NotNull ApolloException e) {
-                listener.onFailure(e.getMessage());
+                listener.onFailure(e);
             }
         });
     }
