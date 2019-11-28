@@ -3,34 +3,61 @@
 
 ## Introduction
 
-This is a sample Android Java application showing use of DataSync, [Keycloak](https://www.keycloak.org/about.html) and Unified Push using native upstream SDK's. Application is sending requests to [Ionic showcase server](https://github.com/aerogear/ionic-showcase/tree/master/server) which is a GraphQL server. 
+This is a sample Android Java application showing use of DataSync, [Keycloak](https://www.keycloak.org/about.html) and Unified Push using native upstream SDK's. Backend is covered by a GraphQL server - [Ionic showcase server](https://github.com/aerogear/ionic-showcase/tree/master/server). 
 
-- For DataSync, application uses Apollo Client to query, mutate and subscribe. 
+- For DataSync, application uses [Apollo Client](https://www.apollographql.com/docs/android/essentials/get-started/) to query, mutate and subscribe. 
 - For authorization we are using [AppAuth](https://github.com/openid/AppAuth-Android) to connect
  with Keycloak. 
 - For Unifiedpush support we are using Aerogear SDK.
 
-## Implementation
-### 1. DataSync
-#### Generating queries, mutations and subscriptions
-  To generate queries, mutations and subscriptions of running GraphQL server [Apollo Codegen](https://github.com/apollographql/apollo-tooling) was used.
+## DataSync
 
-#### Creating client
- - First, we need to build OkHttpClient to handle network requests.
-`authHeader` is the actual token received from the token request during authorization flow. `authHeader` must contain `Bearer:` + token value:  `"Bearer: <TOKEN>"`
+### Dependencies Required
+
+In your  `build.gradle` file add:
+
+- Plugin:
+
+```java
+apply plugin: 'com.apollographql.android'
+```
+- Dependencies:
+```java
+implementation 'com.apollographql.apollo:apollo-runtime:1.2.0'
+implementation 'com.apollographql.apollo:apollo-android-support:1.2.0'
+implementation 'com.squareup.okhttp3:okhttp:3.12.2'
+implementation 'com.apollographql.apollo:apollo-http-cache:1.2.1'
+```
+
+### Generating queries, mutations and subscriptions
+  [Apollo Codegen](https://github.com/apollographql/apollo-tooling) is used to generate queries, mutations and subscriptions based off the server side schema.
+
+### 1. Creating client
+
+This part covers creation of the Apollo Client. To find more information about setting up an Apollo Client visit [Apollo documentation](https://www.apollographql.com/docs/android/essentials/get-started/).
+
+#### OkHttpClient
+ OkHttpClient is used to handle network requests. 
+
 
   ```java
-OkHttpClient okHttpClient = new OkHttpClient
+  OkHttpClient okHttpClient = new OkHttpClient
         .Builder()
         .addInterceptor(chain -> {
             Request original = chain.request();
   Request.Builder builder = original.newBuilder().method(original.method(), original.body());
   builder.header("Authorization", authHeader);
- return chain.proceed(builder.build());
+  return chain.proceed(builder.build());
   })
         .build();
 ```
- - Then, NormalizedCacheFactory to provide caching mechanism
+To obtain `authHeader`:
+- User needs to be authorized so we can issue token request to authorization provider.
+- Once token is received add `"Bearer: "` at the begining of the token string.
+- When the token is in the following format: `"Bearer: TOKEN_VALUE"` pass it in to client as `authHeader`
+ 
+#### Setting up cache for offline support 
+Application is using NormalizedCacheFactory to provide caching mechanism
  
  ```java
  ApolloSqlHelper apolloSqlHelper = new ApolloSqlHelper(context, DB_CACHE_NAME);
@@ -38,13 +65,14 @@ OkHttpClient okHttpClient = new OkHttpClient
 NormalizedCacheFactory<LruNormalizedCache> cacheFactory = new LruNormalizedCacheFactory(EvictionPolicy.NO_EVICTION)
         .chain(new SqlNormalizedCacheFactory(apolloSqlHelper));
  ```
- - Passing in connection params for subscriptions to work if server is behind authentication mechanism
+Passing in connection params for subscriptions to work if server is behind authentication mechanism
  
  ```java
  Map<String, Object> connectionParams = new HashMap<>();
 connectionParams.put("Authorization", authHeader);
 ```
-- And build our Apollo Client
+#### Bulding Apollo Client
+
 
 ```java
 return ApolloClient.builder()
@@ -57,8 +85,8 @@ return ApolloClient.builder()
         .build();
 ```
 
-#### Using queries, mutation and subscriptions
-Once client is build we can use it to run queries, mutations and subscriptions. On application start, a query, mutation or subscription are build
+### 2. Using queries, mutation and subscriptions
+Client is used to run queries, mutations and subscriptions. On application start, a query, mutation or subscription are build. For more information regarding building queries, mutations and subscription follow [Apollo Documentation for Android](https://www.apollographql.com/docs/android/).
 #### Query
 
 ```java
@@ -103,8 +131,9 @@ DeleteTaskSubscription deleteTaskSubscription = DeleteTaskSubscription
    client.subscribe(deleteTaskSubscription)
         .execute(new ApolloSubscriptionCall.Callback<DeleteTaskSubscription.Data>() {
   ```
-- Currently the only way to refresh cache after receiving subscription response is to use `subscribeToMore`, however, this is not available in java.
+- Currently the only way to refresh cache after receiving subscription response is to use `subscribeToMore`, however, this is not available in Java.
   After request has been sent we either receive `onResponse`, if request was successful, or `onFailure` if request has failed.
+  You can find example logic for `onResponse` or `onFailure` in  [Apollo documentation](https://www.apollographql.com/docs/android/essentials/queries/).
 
  ```java
   @Override
@@ -116,11 +145,20 @@ public void onFailure(@NotNull ApolloException e) {
     ON FAILURE LOGIC
 }
 ```
-### 2. Keycloak implementation
-To implement Keycloak with our app we have used [AppAuth](https://github.com/openid/AppAuth-Android). 
-You will need a keycloak instance running either on OpenShift or you can setup locally on Ionic Showcase server that has been used in our example app.
+## Keycloak implementation
+[AppAuth ](https://github.com/openid/AppAuth-Android/blob/master/README.md) was used to implement Keycloak support.
+To be able to run this example app keycloak instance running either on OpenShift or locally is required. To run locally, follow instructions on [Ionic showcase server](https://github.com/aerogear/ionic-showcase/tree/master/server).
 
-- First step is to fetch well knows configuration for Keycloak
+#### Dependencies Required
+Add the following to your `build.gradle` file:
+
+```java
+implementation 'net.openid:appauth:0.7.1'
+```
+
+### 1. Fetching well known configuration
+
+First step is to fetch well known configuration.
 
 ```java
 mAuthService = new AuthorizationService(this);
@@ -136,7 +174,9 @@ final AuthorizationServiceConfiguration.RetrieveConfigurationCallback retrieveCa
 String discoveryEndpoint = mobileService.getKIssuer() + ".well-known/openid-configuration";
 AuthorizationServiceConfiguration.fetchFromUrl(Uri.parse(discoveryEndpoint), retrieveCallback);
 ```
-- Once we have received configuration from Keycloak we can build Authorization Request
+### 2. Building authorization request
+
+Once configuration is received from Keycloak, we can build Authorization Request.
 
 ```java
 String k_REDIRECT_URI = "com.m.androidnativeapp:/oauth2redirect";
@@ -152,8 +192,13 @@ AuthorizationRequest authRequest = authorizationRequest.build();
 Intent authIntent = mAuthService.getAuthorizationRequestIntent(authRequest);
 startActivityForResult(authIntent, RC_AUTH);
 ```
-- It is important to note that we need to provide valid `redirect_URI` and `clientId`, in our sample app we are using `mobile-services.json` file that has been generated in [MDC](https://access.redhat.com/documentation/en-us/red_hat_mobile_developer_services/1/pdf/getting_started/Red_Hat_Mobile_Developer_Services-1-Getting_Started-en-US.pdf). Once authorization request has been send app is redirected to Keycloak log in screen.
-- After logging in with valid credentials and providing valid `redirect_URI` user is pushed back to the application and can retrieve response and can update state in auth state manager if wish to do so.
+- It is important to note that valid `redirect_URI` and `clientId` are required, in this sample app both variables are located in, you will however, need to provide your own ones. 
+Once authorization request has been send, app is redirected to Keycloak log in screen. 
+For more information about `redirect_URI` or `clientId` please visit [AppAuth documentation](https://github.com/openid/AppAuth-Android/blob/master/README.md).
+
+### 3. Redirecting back to the application
+
+After logging in with valid credentials and providing valid `redirect_URI` user is pushed back to the application and can retrieve response. Optionally, `authState` can be updated as well. For more information about `authState` visit [AppAuth documentation](https://github.com/openid/AppAuth-Android/blob/master/README.md).
 
 ```java
 @Override
@@ -172,7 +217,10 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
   }
 }
 ```
-- With the response back we can trigger `exchangeAuthorizationCode` and perform token request
+
+### 4. Requesting token
+
+With the response back `exchangeAuthorizationCode` can be triggered and token request performed.
 
 ```java
 private void exchangeAuthorizationCode(AuthorizationResponse authorizationResponse) {
@@ -187,7 +235,7 @@ private void performTokenRequest(TokenRequest request) {
   });
 }
 ```
-- Once we get a response we can view our token details
+On response token details can be viewed and used to construct `authHeader` used during Apollo Client initialization.
 
 ```java
 private void receivedTokenResponse(
@@ -195,85 +243,50 @@ private void receivedTokenResponse(
   @Nullable AuthorizationException authException) {
     mAuthState.update(tokenResponse, authException);
 
-  System.out.println("Token expires in : " + mAuthState.getAccessTokenExpirationTime());
-
   startActivity(new Intent(this, MainActivity.class));
 }
 ```
-### 3. Unifiedpush implementation
-#### External Setup
-For setting up push notifications a [firebase](https://firebase.google.com/) account is required. The following information below is required and can be found the firebase project settings.
+## Unifiedpush implementation
+
+#### Dependencies Required
+Add the following to your `build.gradle` file:
+
+```java
+apply plugin: 'com.google.gms.google-services'
+```
+
+```java
+implementation 'org.jboss.aerogear:aerogear-android-push:5.1.0'
+```
+
+### 1. External Setup
+For setting up push notifications a [Firebase](https://firebase.google.com/) account is required. The following information below is required and can be found the firebase project settings.
 
 - The `google-services.json` file.
 - Sender ID 
 - Server Key
 
-With in the [Aerogear Unifiefpush Server](https://github.com/aerogear/aerogear-unifiedpush-server) create you application. For creating the application you will need the following information.
+Create application within the [Aerogear Unifiefpush Server](https://github.com/aerogear/aerogear-unifiedpush-server) . For creating the application `Sender Id` and `Server Key` are required, both values can be obtained from Firebase.
 
-- Sender ID - This is gotten from firebase
-- Server Key - this is gotten from firebase
-
-Once the application variant has been set up, the following information is need to add to the `push-config.json` file.
+Once the application variant has been set, add to the `push-config.json` file.
 
 - Server URL
 - Variant ID
 - Variant Secret
-- Sender ID (This is the same sender ID as gotten from firebase)
+- Sender ID (`Sender Id` obtained from Firebase)
 
-Located in `app/src/main/assets` folder is a sample of the `push-config.json` file which has the following format. This file is auto located by the [aerogear-android-push](https://github.com/aerogear/aerogear-android-push) package.
-
-```json
-
-{
-  "pushServerURL": "pushServerURL (e.g http(s)//host:port/context)",
-  "android": {
-    "senderID": "senderID (e.g Google Project ID only for android)",
-    "variantID": "variantID (e.g. 1234456-234320)",
-    "variantSecret": "variantSecret (e.g. 1234456-234320)"
-  }
-}
-```
-
-#### Project Setup
-- Include the [aerogear-android-push](https://github.com/aerogear/aerogear-android-push) package in `build.gradle`.  
-
-```
-dependencies {
-    ...
-    implementation 'org.jboss.aerogear:aerogear-android-push:5.1.0'
-    ...
-}
-```
-- Edit the `AndroidManifest.xml` to allow permissions for the push notifications.
+### 2. Project Setup
+ Edit the `AndroidManifest.xml` to allow permissions for the push notifications.
 
 ```xml
-<manifest>
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    ...
-    <application
-        android:name="com.m.push.PushApplication"
-        >
-        ...
-    </application>
-</manifest>
 ```
 
-- Create the new application launcher class. In this class the ups registrar is setup. 
-- The `onCreate` function consumes the `push-config.json` file.
+#### Setting Ups registrar
+
+The `onCreate` function from [PushApplication.java](https://github.com/aerogear/native-android-example/blob/master/app/src/main/java/com/m/push/PushApplication.java) file consumes the `push-config.json` file.
 
 ```java
-package com.m.push;
-
-import android.app.Application;
-
-import org.jboss.aerogear.android.unifiedpush.PushRegistrar;
-import org.jboss.aerogear.android.unifiedpush.RegistrarManager;
-import org.jboss.aerogear.android.unifiedpush.fcm.AeroGearFCMPushJsonConfiguration;
-
-public class PushApplication extends Application {
-
-    private static final String PUSH_REGISTRAR_NAME = "myPushRegistrar";
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -284,277 +297,18 @@ public class PushApplication extends Application {
 
     }
 
-    // Accessor method for Activities to access the 'PushRegistrar' object
     public PushRegistrar getPushRegistrar() {
         return RegistrarManager.getRegistrar(PUSH_REGISTRAR_NAME);
     }
-
 }
 ```
 
-- The next step would be to configure the notification handler. This class will implement the MessageHandler interface. 
-- `onMessage()` method handles what happens when the device receives a message. This function is called when the application is in the foreground and in the background. 
-- `notify()` sets up how the message should be displayed in the top notification area. The activity that is opened when the user clicks on the notifications is configured here as well. Other information such as title and icon can also be set at this time. 
+#### Configurating notification handler
 
-```java 
-package com.m.push;
+Next, configure the notification handler. This class allows to control how to handle received notifications, and how the notification is displayed to the user. Code for configuration of notification handler can be viewed in [NotifyingHandler.java](https://github.com/aerogear/native-android-example/blob/master/app/src/main/java/com/m/push/NotifyingHandler.java) file.
 
-public class NotifyingHandler implements MessageHandler {
+### 3. Use of Ups registrar and message handler
+Update the `MainActivity` class to use the new message handler and register with the Unifiedpush Server. Unifiedpush support is setup, and initialized in [MainActivity.java](https://github.com/aerogear/native-android-example/blob/master/app/src/main/java/com/m/androidNativeApp/MainActivity.java). 
 
-    public static final int NOTIFICATION_ID = 1;
-    private Context context;
 
-    public static final NotifyingHandler instance = new NotifyingHandler();
-
-    public NotifyingHandler() {}
-    
-    @Override
-    public void onMessage(Context context, Bundle bundle) {
-        this.context = context;
-
-        String message = bundle.getString(UnifiedPushMessage.ALERT_KEY);
-
-        Log.d("APP: Notification", message);
-
-        notify(bundle);
-    }
-
-    private void notify(Bundle bundle) {
-        NotificationManager mNotificationManager = (NotificationManager)
-                context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        String message = bundle.getString(UnifiedPushMessage.ALERT_KEY);
-
-        Intent intent = new Intent(context, MainActivity.class)
-                .addFlags(PendingIntent.FLAG_UPDATE_CURRENT)
-                .putExtra(UnifiedPushMessage.ALERT_KEY, message);
-
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                .setAutoCancel(true)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(context.getString(R.string.app_name))
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setContentText(message);
-
-        mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
-    }
-
-}
-```
-
-- Update the `MainActivity` class to use the new message handler and register with the Unifiedpush Server. 
-- In the `onCreate()`, calling `setupPush()` registers with the Unifiedpush server.  The `setupPush()` function controls what happens when the setup was successful or unsuccessful. 
-- The `onResume()` and `onPause()` functions are ensuring that the message handler is registered while the device is in these states. 
-- While the application is in the foreground the `onMessage()` function is called to handle the push notification. In this example its a simple toast that is shown to the user. 
-- Finally the `toastStartUpPushNotification()` is an example that is called when the user launches the application. If the application is launched by the user clicking in the push notification, that notification gets toasted to the user.
-
-```java
-public class MainActivity extends AppCompatActivity implements MessageHandler {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        setupPush();
-        toastStartUpPushNotification();
-    }
-    
-    @Override
-    protected void onResume() {
-        super.onResume();
-        RegistrarManager.registerMainThreadHandler(this);
-        RegistrarManager.unregisterBackgroundThreadHandler(NotifyingHandler.instance);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        RegistrarManager.unregisterMainThreadHandler(this);
-        RegistrarManager.registerBackgroundThreadHandler(NotifyingHandler.instance);
-    }
-
-    @Override
-    public void onMessage(Context context, Bundle bundle) {
-        // display the message contained in the payload
-        Toast.makeText(getApplicationContext(),
-                bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
-
-    }
-    
-    private void setupPush(){
-        PushApplication application = (PushApplication) getApplication();
-        PushRegistrar pushRegistrar = application.getPushRegistrar();
-        pushRegistrar.register(getApplicationContext(), new Callback<Void>() {
-            
-            @Override
-            public void onSuccess(Void data) {
-                Log.d(TAG, "Registration Succeeded");
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Log.e(TAG, e.getMessage(), e);
-                Toast.makeText(getApplicationContext(),
-                        "Ops, something is wrong :(", Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-    
-    public void toastStartUpPushNotification(){
-        if (getIntent() != null) {
-            Bundle bundle = getIntent().getExtras();
-            if (bundle != null && bundle.getString(UnifiedPushMessage.ALERT_KEY) != null) {
-                Toast.makeText(getApplicationContext(),
-                        bundle.getString(UnifiedPushMessage.ALERT_KEY), Toast.LENGTH_LONG).show();
-            }
-
-        }
-    }
-
-}
-```
-More information can be found at [docs.aerogear.org](https://docs.aerogear.org/aerogear/latest/push-notifications.html).
-
-### 4. Mobile-services parser
-The Mobile services parser is a helper class to parse the `mobile-services.json` file. 
-This file contains the connection details for the services used within the application.
-
-`IMobileService` has method stubs for configuration getters required to configure the `Apollo-Client`, `App-Auth` and `Unified push`. 
-These methods are:
-
-- `String getGraphqlServer()` = Return the URL for a GraphQL server.
-- `String getKIssuer()` = Returns the Issuer URL for AppAuth.
-- `String getKClientId()` = Returns the client Id for AppAuth 
-- `String getPushUrl()` = Returns the URL for the unified push server.
-- `String getPushVariantId()` = Returns the Variant ID for the unified push server.
-- `String getPushVariantSecret()` = Returns the Variant Secret for the unified push server.
- 
-#### mobile-services.json
- 
-In our example, `mobile-services.json` is saved in `app/src/main/assets/config`.
-There are three types of services in the services list. 
-Each of these have the configuration for the different type services which are:
-
-- **sync-app** 
-- **keycloak**
-- **push** 
-
-##### sync-app
-Sync-app holds the configuration for connecting to a GraphQL server.
-The JSON object in the services list, at minimum, needs the fields in the example below.
-
-Some GraphQL servers require a web socket URL which is placed in the `config` object.
-When this object is converted into a java object, it takes the form of `SyncApp.class`
-
-```json
-  {
-    "config": {
-      "websocketUrl": "wss://server.example.com/graphql"
-    },
-    "name": "sync-app",
-    "type": "sync-app",
-    "url": "https://server.example.com/graphql"
-  }
-```
-##### Keycloak
-
-The JSON object example below holds the configuration for Keycloak server which would be in the services array.
-When the `mobile-service.json` file is parsed, configuration build is converted to a java `Keycloak.class` object.
-
-```json
-    {
-      "config": {
-        "auth-server-url": "https://sso.example.com/auth",
-        "confidential-port": 0,
-        "public-client": true,
-        "realm": "example-app-realm",
-        "resource": "example-app-client",
-        "ssl-required": "external"
-      },
-      "name": "keycloak",
-      "type": "keycloak",
-      "url": "https://sso.example.com/auth"
-    }
-```
-##### Push
-
-The Push example configuration is not used in our example, but the following would be its format.
-
-```json
-    {
-      "config": {
-        "android": {
-          "variantID": "variantID (e.g. 1234456-234320)",
-          "variantSecret": "variantSecret (e.g. 1234456-234320)"
-        }
-      },
-      "name": "push",
-      "type": "push",
-      "url": "https://push.example.com"
-    }
-```
-The only information that is missing is `sender Id`, which can be found in application settings on firebase, or in the `google-services.json` file, which is required in this example application.
-
-#### MobileService.class
-
-`MobileServices.class` extends `IMobileService` which gives access to all the configuration setting that is in the `mobile-services.json` file.
-There is a third party package required. In the `build.gradle` add the following:
-
-```
-dependencies {
-    ...
-    implementation 'com.google.code.gson:gson:2.8.6'
-    ...
-}
-```
-For more information on `Gson` please visit [github.com/google.gson](https://github.com/google/gson).
-To get an instances of the class call `MobileService.getInstance(<Application context>)`. 
-`Application Context` is required for reading files from disc.
-On the initial call the `mobile-services.json` file is read and parsed.
-
-The first instance where this class is used is in the `AppAuthActivity`.
-
-```java
-public class AppAuthActivity extends AppCompatActivity {
-    ...
-    public static MobileService mobileService;
-    
-    @override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Context context = getApplicationContext();
-        
-        mobileService = MobileService.getInstance(context.getApplication());
-        ...
-    }
-}
-```
-The next place that `mobileService` is accessed is the `MainActivity` to configure client.
-
-```java
-...
-import static com.m.services.appAuth.AppAuthActivity.mobileService;
-
-public class MainActivity extends AppCompatActivity implements MessageHandler {
-
-        @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setupClient();
-        ...
-    }
-        
-    ...
-    
-    public void setupClient() {
-        String token = "Bearer " + mAuthStateManager.getCurrent().getAccessToken();
-        client = Client.setupApollo(mobileService.getGraphqlServer(), token, getApplicationContext());
-    }
-}
-```
 
