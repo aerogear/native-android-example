@@ -276,11 +276,6 @@ Once the application variant has been set, add to the `push-config.json` file.
 - Sender ID (`Sender Id` obtained from Firebase)
 
 ### 2. Project Setup
- Edit the `AndroidManifest.xml` to allow permissions for the push notifications.
-
-```xml
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-```
 
 #### Setting Ups registrar
 
