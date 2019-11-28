@@ -12,11 +12,12 @@ import com.apollographql.apollo.exception.ApolloException;
 import com.m.androidNativeApp.CreateTaskMutation;
 import com.m.androidNativeApp.MainActivity;
 import com.m.androidNativeApp.R;
+import com.m.services.appAuth.AppAuthActivity;
 
 import org.jetbrains.annotations.NotNull;
 
 import static com.m.androidNativeApp.MainActivity.client;
-import static com.m.helper.LoginActivity.RE_AUTH;
+import static com.m.services.appAuth.AppAuthActivity.RE_AUTH;
 
 
 public class CreateTask extends Activity {
@@ -27,6 +28,11 @@ public class CreateTask extends Activity {
         setContentView(R.layout.add_task);
     }
 
+    /**
+     * Create task mutation is being build with passed in Params of taskTitle, taskDescription
+     * and then passed in to Apollo Client to execute the mutations and redirect back to main activity.
+     * @param view
+     */
     public void createTask(View view) {
         EditText taskTitle = findViewById(R.id.title_input);
         EditText taskDescription = findViewById(R.id.description_input);
@@ -47,7 +53,7 @@ public class CreateTask extends Activity {
             public void onFailure(@NotNull ApolloException e) {
                 if (e.getMessage().equals("HTTP 403 Forbidden")) {
                     RE_AUTH = 403;
-                    Intent redirectToRefreshToken = new Intent(CreateTask.this, LoginActivity.class);
+                    Intent redirectToRefreshToken = new Intent(CreateTask.this, AppAuthActivity.class);
                     startActivity(redirectToRefreshToken);
                 }
             }

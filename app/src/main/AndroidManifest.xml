@@ -20,6 +20,7 @@
     <meta-data android:name="DEFAULT_MESSAGE_KEY" android:value="com.m.push.NotifyingHandler" />
 
         <activity android:name="com.m.helper.LoginActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
