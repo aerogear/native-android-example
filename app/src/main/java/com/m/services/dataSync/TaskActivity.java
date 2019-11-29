@@ -113,8 +113,6 @@ public class TaskActivity extends AppCompatActivity {
     private void handleErrorExceptions(ApolloException error){
         if (error instanceof ApolloHttpException){
             handleHttpErrors((ApolloHttpException) error);
-        } else if (error instanceof ApolloNetworkException){
-            uiToast(error.getMessage());
         } else {
             uiToast(error.getMessage());
         }

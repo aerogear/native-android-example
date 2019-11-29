@@ -42,7 +42,6 @@ public class LoginController {
     }
 
     public void reAuthorise() {
-        RE_AUTH = 403;
         Intent redirectToRefreshToken = new Intent(context, LoginActivity.class);
         context.startActivity(redirectToRefreshToken);
     }

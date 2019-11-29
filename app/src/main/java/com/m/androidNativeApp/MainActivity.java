@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
              */
             @Override
             public void onSuccess(Void data) {
-                Log.d(TAG, "Registration Succeeded");
+                Log.d("APP:", "Registration Succeeded");
             }
 
             /**
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements MessageHandler {
              */
             @Override
             public void onFailure(Exception e) {
-                Log.e(TAG, e.getMessage(), e);
+                Log.e("APP:", e.getMessage(), e);
                 Toast.makeText(getApplicationContext(),
                         "Ops, something is wrong :(", Toast.LENGTH_LONG).show();
             }
