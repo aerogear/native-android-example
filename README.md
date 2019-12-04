@@ -266,7 +266,7 @@ For setting up push notifications a [Firebase](https://firebase.google.com/) acc
 - Sender ID 
 - Server Key
 
-Create application within the [Aerogear Unifiefpush Server](https://github.com/aerogear/aerogear-unifiedpush-server) . For creating the application `Sender Id` and `Server Key` are required, both values can be obtained from Firebase.
+Create application within the [Aerogear Unifiedpush Server](https://github.com/aerogear/aerogear-unifiedpush-server) . For creating the application `Sender Id` and `Server Key` are required, both values can be obtained from Firebase.
 
 Once the application variant has been set, add to the `push-config.json` file.
 
