@@ -1,4 +1,4 @@
-package com.m.services.appAuth;
+package com.m.services.auth;
 
 
 import android.content.Context;

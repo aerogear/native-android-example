@@ -1,7 +1,7 @@
-package com.m.helper.configModel;
+package com.m.models.configModel;
 
-import com.m.helper.configModel.config.AndroidConfig;
-import com.m.helper.configModel.config.PushConfig;
+import com.m.models.configModel.config.AndroidConfig;
+import com.m.models.configModel.config.PushConfig;
 
 public class Push extends Service {
 

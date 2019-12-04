@@ -1,25 +1,24 @@
-package com.m.helper;
+package com.m.services.dataSync;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.m.androidNativeApp.R;
+import com.m.models.Item;
 
 import java.util.List;
 
-public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
-    Context mCtx;
+public class ItemAdapter extends RecyclerView.Adapter<ItemViewHolder> {
+    Context context;
     private List<Item> itemList;
 
-    public ItemAdapter(Context mCtx, List<Item> itemList) {
-        this.mCtx = mCtx;
+    ItemAdapter(Context context, List<Item> itemList) {
+        this.context = context;
         this.itemList = itemList;
     }
 
@@ -27,11 +26,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        LayoutInflater inflater = LayoutInflater.from(mCtx);
+        LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.list_layout, null);
-        ItemViewHolder holder = new ItemViewHolder(view);
 
-        return holder;
+        return new ItemViewHolder(view);
     }
 
     @Override
@@ -47,21 +45,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
     @Override
     public int getItemCount() {
         return itemList.size();
-    }
-
-    class ItemViewHolder extends RecyclerView.ViewHolder {
-
-        TextView title, description;
-        Button deleteButton;
-
-        public ItemViewHolder(@NonNull View itemView) {
-            super(itemView);
-
-            title = itemView.findViewById(R.id.titleView);
-            description = itemView.findViewById(R.id.descriptionView);
-            deleteButton = itemView.findViewById(R.id.deleteButton);
-
-        }
     }
 
 

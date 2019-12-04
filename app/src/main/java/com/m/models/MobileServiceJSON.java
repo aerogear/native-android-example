@@ -1,4 +1,6 @@
-package com.m.helper.configModel;
+package com.m.models;
+
+import com.m.models.configModel.Service;
 
 import java.util.ArrayList;
 

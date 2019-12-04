@@ -1,4 +1,4 @@
-package com.m.helper.configModel;
+package com.m.models.configModel;
 
 public class Service {
     private String id;
